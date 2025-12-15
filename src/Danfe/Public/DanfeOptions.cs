@@ -5,6 +5,8 @@ namespace Direction.NFSe.Danfe;
 /// </summary>
 public sealed class DanfeOptions
 {
+    /// <summary>Path da logo da NFSe</summary>
+    public string? LogoNFSePath { get; init; }
     /// <summary>Diretório base para resolução de paths relativos (default: AppDomain.CurrentDomain.BaseDirectory).</summary>
     public string? BasePath { get; init; }
 

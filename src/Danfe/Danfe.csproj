@@ -67,4 +67,11 @@
     <None Include="..\..\CODE_OF_CONDUCT.md" Pack="true" PackagePath="\" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
 </ItemGroup>
+
+
+<ItemGroup>
+  <None Update="Assets\Logos\nfse.png">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
 </Project>

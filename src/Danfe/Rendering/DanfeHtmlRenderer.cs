@@ -106,6 +106,9 @@ public sealed class DanfeHtmlRenderer
 
         var logoBase64 = Helper.GetLogo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, municipioPrestador?.LogoPath ?? string.Empty));
 
+        // Logo da nfse
+        var logoNfse = _options.LogoNFSePath != null ? Helper.GetLogo(_options.LogoNFSePath) : Helper.GetLogo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Logos", "nfse.png"));
+
         // Caminhos/valores auxiliares
         int? tpRetIssqn = infDps.valores?.trib?.tribMun?.tpRetISSQN;
         int? opSimpNac = infDps.prest?.regTrib?.opSimpNac;
@@ -118,6 +121,7 @@ public sealed class DanfeHtmlRenderer
         var map = new Dictionary<string, string>
         {
             // Logos
+            ["{{NFSE_LOGO}}"] = logoNfse ?? TransparentPixelBase64,
             ["{{PREFEITURA_LOGO}}"] = logoBase64 ?? TransparentPixelBase64,
             ["{{LOGO_NAME}}"] = DanfeFallback.OrDash(municipioPrestador?.LogoName, warnings, fieldName: "LogoName", path: "MunicipiosIbge.GetMunicipio(...).LogoName"),
 
