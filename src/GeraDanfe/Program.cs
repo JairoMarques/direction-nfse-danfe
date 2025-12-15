@@ -1,5 +1,5 @@
-using Direction.NFSe.Danfe;
 using System.Xml.Serialization;
+using Direction.NFSe.Danfe;
 
 
 Console.Write("Informe o caminho do XML (ou arraste o arquivo aqui e pressione ENTER): ");

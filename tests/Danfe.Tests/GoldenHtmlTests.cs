@@ -6,7 +6,7 @@ public class GoldenHtmlTests
     [Fact]
     public void Html_snapshot_should_match()
     {
-        var service = new DanfeService();;
+        var service = new DanfeService(); ;
         var result = service.Generate(File.ReadAllText("Fixtures/nfse.xml"), DanfeEnvironment.Production);
 
         var normalized = HtmlNormalization.Normalize(result.Html);
