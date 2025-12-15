@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Xmls\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Danfe\Danfe.csproj" />
   </ItemGroup>
 
