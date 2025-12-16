@@ -120,6 +120,11 @@ public sealed class DanfeHtmlRenderer
         // Monta mapa de placeholders (agora com warnings)
         var map = new Dictionary<string, string>
         {
+            // Fonts
+            ["{{FONT_FAMILY}}"] = _options.FontFamily ?? "Verdana, Helvetica, sans-serif;",
+            ["{{FONT_SIZE}}"] = _options.FontSize ?? "12px;",
+            ["{{FONT_SIZE_HEADER}}"] = _options.FontSize ?? "14px;",
+            ["{{FONT_SIZE_QRCODE}}"] = _options.FontSize ?? "11px;",
             // Logos
             ["{{NFSE_LOGO}}"] = logoNfse ?? TransparentPixelBase64,
             ["{{PREFEITURA_LOGO}}"] = logoBase64 ?? TransparentPixelBase64,

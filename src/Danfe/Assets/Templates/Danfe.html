@@ -7,8 +7,8 @@
   </head>
   <body
     style="
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 12px;
+      font-family: {{FONT_FAMILY}}
+      font-size: {{FONT_SIZE}}
       margin: 0;
       padding: 0;
       margin: 5px;
@@ -23,7 +23,7 @@
             <tr>
               <td style="width: 30%; vertical-align: top">
                 <img
-                  style="padding: 6px 0px 6px 5px; width: auto; height: 30px"
+                  style="padding: 6px 0px 6px 5px; width: auto; height: 40px"
                   alt="Logo"
                   class="nfse-logo"
                   src="data:image/png;base64,{{NFSE_LOGO}}"
@@ -45,7 +45,7 @@
                   <tr>
                     <td style="vertical-align: top">
                       <img
-                        style="width: auto; height: 40px; margin-top: 2px; margin-right: 10px"
+                        style="width: auto; height: 50px; margin-top: 2px; margin-right: 10px"
                         class="prefeitura-logo"
                         src="data:image/png;base64,{{PREFEITURA_LOGO}}"
                       />
@@ -67,7 +67,7 @@
           class="section-title"
           style="
             padding: 4px 6px;
-            font-size: 12px;
+            font-size: {{FONT_SIZE}}
             text-transform: uppercase;
             text-transform: none;
             margin-bottom: -5px;
@@ -85,21 +85,21 @@
                   <tr>
                     <td style="vertical-align: top; width: 25%">
                       <div>
-                        <span class="label" style="font-size: 12px; color: black">Número da NFS-e</span>
+                        <span class="label" style="font-size: {{FONT_SIZE}} color: black">Número da NFS-e</span>
                         <br />
                         {{NUMERO_NFSE}}
                       </div>
                     </td>
                     <td style="vertical-align: top; width: 25%">
                       <div>
-                        <span class="label" style="font-size: 12px; color: black">Competência da NFS-e</span>
+                        <span class="label" style="font-size: {{FONT_SIZE}} color: black">Competência da NFS-e</span>
                         <br />
                         {{COMPETENCIA}}
                       </div>
                     </td>
                     <td style="vertical-align: top; width: 25%">
                       <div>
-                        <span class="label" style="font-size: 12px; color: black">Data e Hora da emissão da NFS-e</span>
+                        <span class="label" style="font-size: {{FONT_SIZE}} color: black">Data e Hora da emissão da NFS-e</span>
                         <br />
                         {{DATA_HORA_EMISSAO}}
                       </div>
@@ -110,21 +110,21 @@
                   <tr>
                     <td style="vertical-align: top; width: 25%">
                       <div>
-                        <span class="label" style="font-size: 12px; color: black">Número da DPS</span>
+                        <span class="label" style="font-size: {{FONT_SIZE}} color: black">Número da DPS</span>
                         <br />
                         {{NUMERO_DPS}}
                       </div>
                     </td>
                     <td style="vertical-align: top; width: 25%">
                       <div>
-                        <span class="label" style="font-size: 12px; color: black">Série da DPS</span>
+                        <span class="label" style="font-size: {{FONT_SIZE}} color: black">Série da DPS</span>
                         <br />
                         {{SERIE_DPS}}
                       </div>
                     </td>
                     <td style="vertical-align: top; width: 25%">
                       <div>
-                        <span class="label" style="font-size: 12px; color: black">Data e Hora da emissão da DPS</span>
+                        <span class="label" style="font-size: {{FONT_SIZE}} color: black">Data e Hora da emissão da DPS</span>
                         <br />
                         {{DATA_HORA_EMISSAO_DPS}}
                       </div>
@@ -147,7 +147,7 @@
               >
                 <img alt="Logo" class="qrcode" src="{{QRCODE_SRC}}" style="width: 100%; height: 100%" />
               </div>
-              <div style="font-size: 11px; text-align: left">
+              <div style="font-size: {{FONT_SIZE_QRCODE}} text-align: left">
                 A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela consulta da chave
                 de acesso no portal nacional da NFS-e
               </div>
@@ -162,22 +162,22 @@
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 14px; color: black; font-size: 12px">EMITENTE DA NFS-e</span>
+                <span class="label" style="font-size: {{FONT_SIZE_HEADER}} color: black; font-size: 12px">EMITENTE DA NFS-e</span>
                 <br />
                 {{PREST_SERV}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">CNPJ / CPF / NIF</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">CNPJ / CPF / NIF</span>
                 <br />
                 {{PREST_CNPJ}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Inscrição Municipal</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Inscrição Municipal</span>
                 <br />
                 {{PREST_IM}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Telefone</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Telefone</span>
                 <br />
                 {{PREST_FONE}}
               </td>
@@ -186,12 +186,12 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">Nome / Nome Empresarial</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Nome / Nome Empresarial</span>
                 <br />
                 {{PREST_RAZAO}}
               </td>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">E-mail</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">E-mail</span>
                 <br />
                 {{PREST_EMAIL}}
               </td>
@@ -200,17 +200,17 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">Endereço</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Endereço</span>
                 <br />
                 {{PREST_ENDERECO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Município</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Município</span>
                 <br />
                 {{PREST_MUNICIPIO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">CEP</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">CEP</span>
                 <br />
                 {{PREST_CEP}}
               </td>
@@ -219,12 +219,12 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">Simples Nacional na Data de Competência</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Simples Nacional na Data de Competência</span>
                 <br />
                 {{PREST_SIMPLES}}
               </td>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">Regime de Apuração Tributária pelo SN</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Regime de Apuração Tributária pelo SN</span>
                 <br />
                 {{PREST_REGIME_SN}}
               </td>
@@ -239,20 +239,20 @@
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 14px; color: black; font-size: 12px">TOMADOR DO SERVIÇO</span>
+                <span class="label" style="font-size: {{FONT_SIZE_HEADER}} color: black; font-size: 12px">TOMADOR DO SERVIÇO</span>
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">CNPJ / CPF / NIF</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">CNPJ / CPF / NIF</span>
                 <br />
                 {{TOMA_CNPJ}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Inscrição Municipal</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Inscrição Municipal</span>
                 <br />
                 {{TOMA_IM}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Telefone</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Telefone</span>
                 <br />
                 {{TOMA_FONE}}
               </td>
@@ -261,12 +261,12 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">Nome / Nome Empresarial</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Nome / Nome Empresarial</span>
                 <br />
                 {{TOMA_RAZAO}}
               </td>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">E-mail</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">E-mail</span>
                 <br />
                 {{TOMA_EMAIL}}
               </td>
@@ -275,17 +275,17 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">Endereço</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Endereço</span>
                 <br />
                 {{TOMA_ENDERECO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Município</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Município</span>
                 <br />
                 {{TOMA_CMUN}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">CEP</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">CEP</span>
                 <br />
                 {{TOMA_CEP}}
               </td>
@@ -300,29 +300,29 @@
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- SERVIÇO -->
       <div class="section" style="border-bottom: none; height: 330px; max-height: 330px">
-        <div class="section-title" style="padding: 4px 6px; font-size: 14px; text-transform: uppercase">
+        <div class="section-title" style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}} text-transform: uppercase">
           Serviço Prestado
         </div>
         <div class="section-content" style="padding: 1px 6px 6px 6px">
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Código de Tributação Nacional</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Código de Tributação Nacional</span>
                 <br />
                 {{SERV_CTRIBNAC}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Código de Tributação Municipal</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Código de Tributação Municipal</span>
                 <br />
                 {{SERV_CTRIBMUN}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Local da Prestação</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Local da Prestação</span>
                 <br />
                 {{SERV_LOCAL}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">País da Prestação</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">País da Prestação</span>
                 <br />
                 {{SERV_PAIS}}
               </td>
@@ -330,7 +330,7 @@
           </table>
           <div class="mt-1" style="margin-top: 5px; width: 100%">
             <div style="width: 90%">
-              <span class="label" style="font-size: 12px; color: black">Descrição do Serviço</span>
+              <span class="label" style="font-size: {{FONT_SIZE}} color: black">Descrição do Serviço</span>
               <br />
               {{SERV_DESC_HTML}}
             </div>
@@ -340,29 +340,29 @@
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- TRIBUTAÇÃO MUNICIPAL -->
       <div class="section">
-        <div class="section-title" style="padding: 4px 6px; font-size: 14px; text-transform: uppercase">
+        <div class="section-title" style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}} text-transform: uppercase">
           TRIBUTAÇÃO MUNICIPAL
         </div>
         <div class="section-content" style="padding: 1px 6px 6px 6px">
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Tributação do ISSQN</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Tributação do ISSQN</span>
                 <br />
                 {{ISS_TRIBUTACAO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">País Resultado da Prestação do Serviço</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">País Resultado da Prestação do Serviço</span>
                 <br />
                 {{ISS_PAIS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Município de Incidência do ISSQN</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Município de Incidência do ISSQN</span>
                 <br />
                 {{ISS_MUN_INC}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Regime Especial de Tributação</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Regime Especial de Tributação</span>
                 <br />
                 {{ISS_REGIME}}
               </td>
@@ -371,22 +371,22 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Tipo de Imunidade</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Tipo de Imunidade</span>
                 <br />
                 {{ISS_OPERACAO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Suspensão da Exigibilidade do ISSQN</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Suspensão da Exigibilidade do ISSQN</span>
                 <br />
                 {{ISS_SUSPENSAO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Número Processo Suspensão</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Número Processo Suspensão</span>
                 <br />
                 {{ISS_PROCESSO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Benefício Municipal</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Benefício Municipal</span>
                 <br />
                 {{ISS_BENEFICIO}}
               </td>
@@ -395,22 +395,22 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Valor do Serviço</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Valor do Serviço</span>
                 <br />
                 {{VALOR_SERVICO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Desconto Incondicionado</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Desconto Incondicionado</span>
                 <br />
                 {{ISS_DESC_INCOND}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Total Deduções/Reduções</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Total Deduções/Reduções</span>
                 <br />
                 {{ISS_DEDUCOES}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Cálculo do BM</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Cálculo do BM</span>
                 <br />
                 {{ISS_CALCULO}}
               </td>
@@ -419,22 +419,22 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">BC ISSQN</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">BC ISSQN</span>
                 <br />
                 {{ISS_BC}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Alíquota Aplicada</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Alíquota Aplicada</span>
                 <br />
                 {{ISS_ALIQ}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Retenção do ISSQN</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Retenção do ISSQN</span>
                 <br />
                 {{ISS_RETENCAO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">ISSQN Apurado</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">ISSQN Apurado</span>
                 <br />
                 {{ISS_APURADO}}
               </td>
@@ -445,24 +445,24 @@
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- TRIBUTAÇÃO FEDERAL -->
       <div class="section">
-        <div class="section-title" style="padding: 4px 6px; font-size: 14px; text-transform: uppercase">
+        <div class="section-title" style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}} text-transform: uppercase">
           TRIBUTAÇÃO FEDERAL
         </div>
         <div class="section-content" style="padding: 1px 6px 6px 6px">
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">IRRF</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">IRRF</span>
                 <br />
                 {{FED_IRRF}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">CP</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">CP</span>
                 <br />
                 {{FED_CP}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">CSLL</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">CSLL</span>
                 <br />
                 {{FED_CSLL}}
               </td>
@@ -472,22 +472,22 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">PIS</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">PIS</span>
                 <br />
                 {{FED_PIS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">COFINS</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">COFINS</span>
                 <br />
                 {{FED_COFINS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Retenção do PIS/COFINS</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Retenção do PIS/COFINS</span>
                 <br />
                 {{FED_RET_PISCOFINS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Total Tributação Federal</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Total Tributação Federal</span>
                 <br />
                 {{FED_TOTAL}}
               </td>
@@ -498,29 +498,29 @@
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- VALOR TOTAL DA NFS-E -->
       <div class="section">
-        <div class="section-title" style="padding: 4px 6px; font-size: 14px; text-transform: uppercase">
+        <div class="section-title" style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}} text-transform: uppercase">
           VALOR TOTAL DA NFS-E
         </div>
         <div class="section-content" style="padding: 1px 6px 6px 6px">
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Valor do Serviço</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Valor do Serviço</span>
                 <br />
                 {{VALOR_SERVICO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Desconto Condicionado</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Desconto Condicionado</span>
                 <br />
                 {{DESC_COND}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Desconto Incondicionado</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Desconto Incondicionado</span>
                 <br />
                 {{DESC_INCOND}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">ISSQN Retido</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">ISSQN Retido</span>
                 <br />
                 {{ISS_RETIDO}}
               </td>
@@ -529,17 +529,17 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">IRRF, CP, CSLL - Retidos</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">IRRF, CP, CSLL - Retidos</span>
                 <br />
                 {{FED_RETIDOS}}
               </td>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: 12px; color: black">PIS/COFINS Retidos</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">PIS/COFINS Retidos</span>
                 <br />
                 {{PISCOFINS_RET}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: 12px; color: black">Valor Líquido da NFS-e</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Valor Líquido da NFS-e</span>
                 <br />
                 {{VALOR_LIQUIDO}}
               </td>
@@ -550,24 +550,24 @@
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- TOTAIS APROXIMADOS DOS TRIBUTOS -->
       <div class="section">
-        <div class="section-title" style="padding: 4px 6px; font-size: 14px; text-transform: uppercase">
+        <div class="section-title" style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}} text-transform: uppercase">
           TOTAIS APROXIMADOS DOS TRIBUTOS
         </div>
         <div class="section-content" style="padding: 1px 6px 6px 6px">
           <table style="width: 100%; border-collapse: collapse">
             <tr style="text-align: center">
               <td style="vertical-align: top">
-                <span class="label" style="font-size: 12px; color: black">Federais</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Federais</span>
                 <br />
                 {{TOT_FED}}
               </td>
               <td style="vertical-align: top">
-                <span class="label" style="font-size: 12px; color: black">Estaduais</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Estaduais</span>
                 <br />
                 {{TOT_EST}}
               </td>
               <td style="vertical-align: top">
-                <span class="label" style="font-size: 12px; color: black">Municipais</span>
+                <span class="label" style="font-size: {{FONT_SIZE}} color: black">Municipais</span>
                 <br />
                 {{TOT_MUN}}
               </td>
@@ -578,7 +578,7 @@
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- INFORMAÇÕES COMPLEMENTARES -->
       <div class="section" style="border-bottom: none; height: 110px; max-height: 110px">
-        <div class="section-title" style="padding: 4px 6px; font-size: 14px; text-transform: uppercase">
+        <div class="section-title" style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}} text-transform: uppercase">
           INFORMAÇÕES COMPLEMENTARES
         </div>
         <div class="section-content" style="padding: 1px 6px 6px 6px">

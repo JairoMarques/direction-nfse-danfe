@@ -5,6 +5,14 @@ namespace Direction.NFSe.Danfe;
 /// </summary>
 public sealed class DanfeOptions
 {
+    /// <summary>Font-Family usada na Danfe</summary>
+    public string? FontFamily { get; init; }
+    /// <summary>Tamanho da fonte padrão (pixels)</summary>
+    public string? FontSize { get; init; }
+    /// <summary>Tamanho da fonte dos headers (pixels)</summary>
+    public string? FontSizeHeader { get; init; }
+    /// <summary>Tamanho da fonte do QrCode (pixels)</summary>
+    public string? FontSizeQrCode { get; init; }
     /// <summary>Path da logo da NFSe</summary>
     public string? LogoNFSePath { get; init; }
     /// <summary>Diretório base para resolução de paths relativos (default: AppDomain.CurrentDomain.BaseDirectory).</summary>
