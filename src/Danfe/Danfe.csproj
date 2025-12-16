@@ -61,6 +61,13 @@
             PackagePath="contentFiles\any\any\Direction.NFSe.Danfe\Assets\" />
 </ItemGroup>
 
+<ItemGroup>
+    <!-- Para dev local (ProjectReference): copia Assets para bin -->
+    <Content Include="Assets\**\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Visible>false</Visible>
+    </Content>
+</ItemGroup>
 
 <ItemGroup>
     <None Include="buildTransitive\Direction.NFSe.Danfe.targets"
