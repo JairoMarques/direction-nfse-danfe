@@ -21,30 +21,46 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Compute version from tag
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"     # ex: v0.1.1
+          $ver = $tag.TrimStart("v")          # 0.1.1
+          "PACKAGE_VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "Version from tag: $ver"
+
       - name: Restore
         run: dotnet restore
 
       - name: Pack
-        run: dotnet pack src/Danfe/Danfe.csproj -c Release -o artifacts
+        shell: pwsh
+        run: |
+          dotnet pack src/Danfe/Danfe.csproj -c Release -o artifacts /p:PackageVersion=$env:PACKAGE_VERSION
 
       - name: Publish to NuGet
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          if (-not $env:NUGET_API_KEY) {
-            throw "NUGET_API_KEY secret is not set. Configure it in Settings → Secrets and variables → Actions."
+          if (-not $env:NUGET_API_KEY) { throw "NUGET_API_KEY secret is not set." }
+
+          $nupkgs = Get-ChildItem -Path "artifacts" -Filter "*.nupkg" -File
+          if ($nupkgs.Count -eq 0) { throw "No .nupkg found under artifacts/." }
+
+          foreach ($pkg in $nupkgs) {
+            dotnet nuget push $pkg.FullName `
+              --api-key "$env:NUGET_API_KEY" `
+              --source "https://api.nuget.org/v3/index.json" `
+              --skip-duplicate
           }
 
-          dotnet nuget push "artifacts/*.nupkg" `
-            --api-key "$env:NUGET_API_KEY" `
-            --source "https://api.nuget.org/v3/index.json" `
-            --skip-duplicate
-
-          dotnet nuget push "artifacts/*.snupkg" `
-            --api-key "$env:NUGET_API_KEY" `
-            --source "https://api.nuget.org/v3/index.json" `
-            --skip-duplicate
+          $snupkgs = Get-ChildItem -Path "artifacts" -Filter "*.snupkg" -File
+          foreach ($sym in $snupkgs) {
+            dotnet nuget push $sym.FullName `
+              --api-key "$env:NUGET_API_KEY" `
+              --source "https://api.nuget.org/v3/index.json" `
+              --skip-duplicate
+          }
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
