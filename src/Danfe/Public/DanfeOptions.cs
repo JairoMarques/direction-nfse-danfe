@@ -15,7 +15,7 @@ public sealed class DanfeOptions
     public string? FontSizeQrCode { get; init; }
     /// <summary>Path da logo da NFSe</summary>
     public string? LogoNFSePath { get; init; }
-    /// <summary>Diretório base para resolução de paths relativos (default: AppDomain.CurrentDomain.BaseDirectory).</summary>
+    /// <summary>Diretório base para resolução de paths relativos (default: AppContext.BaseDirectory).</summary>
     public string? BasePath { get; init; }
 
     /// <summary>Path completo do template HTML. Se nulo, usa {BasePath}/Templates/Danfe.html</summary>

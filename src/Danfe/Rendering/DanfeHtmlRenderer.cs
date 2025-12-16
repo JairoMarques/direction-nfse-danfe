@@ -19,7 +19,7 @@ public sealed class DanfeHtmlRenderer
     {
         _options = options ?? new DanfeOptions();
 
-        var basePath = _options.BasePath ?? AppDomain.CurrentDomain.BaseDirectory;
+        var basePath = _options.BasePath ?? AppContext.BaseDirectory;
         _templatePath = _options.TemplatePath ?? Path.Combine(basePath, "Assets", "Templates", "Danfe.html");
     }
 
@@ -90,7 +90,7 @@ public sealed class DanfeHtmlRenderer
         // Municípios (auto init)
         if (_options.AutoInitializeMunicipios)
         {
-            var basePath = _options.BasePath ?? AppDomain.CurrentDomain.BaseDirectory;
+            var basePath = _options.BasePath ?? AppContext.BaseDirectory;
             var estados = _options.EstadosCsvPath ?? Path.Combine(basePath, "Assets", "estados.csv");
             var municipios = _options.MunicipiosCsvPath ?? Path.Combine(basePath, "Assets", "municipios.csv");
             MunicipiosIbge.Initialize(estados, municipios);
@@ -104,10 +104,10 @@ public sealed class DanfeHtmlRenderer
         else if (municipioPrestador == null)
             warnings.MunicipioNotFound("infNFSe.DPS.InfDPS.serv.locPrest.cLocPrestacao");
 
-        var logoBase64 = Helper.GetLogo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, municipioPrestador?.LogoPath ?? string.Empty));
+        var logoBase64 = Helper.GetLogo(Path.Combine(AppContext.BaseDirectory, municipioPrestador?.LogoPath ?? string.Empty));
 
         // Logo da nfse
-        var logoNfse = _options.LogoNFSePath != null ? Helper.GetLogo(_options.LogoNFSePath) : Helper.GetLogo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Logos", "nfse.png"));
+        var logoNfse = _options.LogoNFSePath != null ? Helper.GetLogo(_options.LogoNFSePath) : Helper.GetLogo(Path.Combine(AppContext.BaseDirectory, "Assets", "Logos", "nfse.png"));
 
         // Caminhos/valores auxiliares
         int? tpRetIssqn = infDps.valores?.trib?.tribMun?.tpRetISSQN;
