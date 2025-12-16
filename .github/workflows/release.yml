@@ -28,11 +28,23 @@ jobs:
         run: dotnet pack src/Danfe/Danfe.csproj -c Release -o artifacts
 
       - name: Publish to NuGet
+        shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet nuget push artifacts\*.nupkg -k %NUGET_API_KEY% -s https://api.nuget.org/v3/index.json --skip-duplicate
-          dotnet nuget push artifacts\*.snupkg -k %NUGET_API_KEY% -s https://api.nuget.org/v3/index.json --skip-duplicate
+          if (-not $env:NUGET_API_KEY) {
+            throw "NUGET_API_KEY secret is not set. Configure it in Settings → Secrets and variables → Actions."
+          }
+
+          dotnet nuget push "artifacts/*.nupkg" `
+            --api-key "$env:NUGET_API_KEY" `
+            --source "https://api.nuget.org/v3/index.json" `
+            --skip-duplicate
+
+          dotnet nuget push "artifacts/*.snupkg" `
+            --api-key "$env:NUGET_API_KEY" `
+            --source "https://api.nuget.org/v3/index.json" `
+            --skip-duplicate
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
