@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   pack-publish:
@@ -37,30 +38,16 @@ jobs:
         run: |
           dotnet pack src/Danfe/Danfe.csproj -c Release -o artifacts /p:PackageVersion=$env:PACKAGE_VERSION
 
-      - name: Publish to NuGet
-        shell: pwsh
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          if (-not $env:NUGET_API_KEY) { throw "NUGET_API_KEY secret is not set." }
 
-          $nupkgs = Get-ChildItem -Path "artifacts" -Filter "*.nupkg" -File
-          if ($nupkgs.Count -eq 0) { throw "No .nupkg found under artifacts/." }
+      - name: Nuget login (OIDC - temp API key)
+        uses: NuGet/login@v1
+        with:
+          user: direction
+          
 
-          foreach ($pkg in $nupkgs) {
-            dotnet nuget push $pkg.FullName `
-              --api-key "$env:NUGET_API_KEY" `
-              --source "https://api.nuget.org/v3/index.json" `
-              --skip-duplicate
-          }
+      - name: Push to NuGet (OIDC)
+        run: dotnet nuget push ./bin/release/*.nupkg --source https://api.nuget.org/v3/index.json
 
-          $snupkgs = Get-ChildItem -Path "artifacts" -Filter "*.snupkg" -File
-          foreach ($sym in $snupkgs) {
-            dotnet nuget push $sym.FullName `
-              --api-key "$env:NUGET_API_KEY" `
-              --source "https://api.nuget.org/v3/index.json" `
-              --skip-duplicate
-          }
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
