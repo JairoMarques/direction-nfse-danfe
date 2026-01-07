@@ -43,9 +43,13 @@ jobs:
           # Get OIDC token from GitHub with NuGet audience
           $tokenUrl = "$env:ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.nuget.org"
           $headers = @{ Authorization = "Bearer $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN" }
-          $token = (Invoke-RestMethod -Uri $tokenUrl -Headers $headers).value
+          $response = Invoke-RestMethod -Uri $tokenUrl -Headers $headers
+          $token = $response.value
           
-          Write-Host "Token obtained successfully"
+          # Debug: Decode JWT token to see claims
+          $parts = $token.Split('.')
+          $payload = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($parts[1] + "=="))
+          Write-Host "Token claims: $payload"
           
           # Push packages using OIDC token
           dotnet nuget push "$env:GITHUB_WORKSPACE\artifacts\*.nupkg" `
