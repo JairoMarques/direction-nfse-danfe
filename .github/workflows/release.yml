@@ -37,19 +37,24 @@ jobs:
         shell: pwsh
         run: dotnet pack src/Danfe/Danfe.csproj -c Release -o "$env:GITHUB_WORKSPACE\artifacts" /p:PackageVersion=$env:PACKAGE_VERSION
 
-      - name: NuGet login (OIDC)
-        id: nuget-login
-        uses: NuGet/login@v1
-        with:
-          user: ${{ secrets.NUGET_USERNAME }}
-
       - name: Push to NuGet (OIDC)
         shell: pwsh
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $key = "${{ steps.nuget-login.outputs.nuget_api_key }}"
-          if (-not $key) { throw "NuGet/login did not output an api key." }
-          dotnet nuget push "$env:GITHUB_WORKSPACE\artifacts\*.nupkg" --api-key $key --source https://api.nuget.org/v3/index.json --skip-duplicate
-          dotnet nuget push "$env:GITHUB_WORKSPACE\artifacts\*.snupkg" --api-key $key --source https://api.nuget.org/v3/index.json --skip-duplicate
+          # Get OIDC token from GitHub
+          $token = (Invoke-RestMethod -Uri "$env:ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" -Headers @{ Authorization = "Bearer $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN" }).value
+          
+          # Push packages using OIDC
+          dotnet nuget push "$env:GITHUB_WORKSPACE\artifacts\*.nupkg" `
+            --api-key $token `
+            --source https://api.nuget.org/v3/index.json `
+            --skip-duplicate
+          
+          dotnet nuget push "$env:GITHUB_WORKSPACE\artifacts\*.snupkg" `
+            --api-key $token `
+            --source https://api.nuget.org/v3/index.json `
+            --skip-duplicate
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
