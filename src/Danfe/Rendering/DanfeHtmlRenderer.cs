@@ -119,22 +119,26 @@ public sealed class DanfeHtmlRenderer
 
         // Verifica ses a NFSe está cancelada
         string canceladaDiv = isCancelled
-            ? @"<div class=""nfse-cancelada"" style=""
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%) rotate(-30deg);
-                    font-size: 96px;
-                    font-weight: bold;
-                    color: rgba(200, 0, 0, 0.18);
-                    border: 8px solid rgba(200, 0, 0, 0.18);
-                    padding: 20px 40px;
-                    text-transform: uppercase;
-                    z-index: 2;
-                    pointer-events: none;
-                    white-space: nowrap;"">
-                    CANCELADA
-                </div>"
+            ? @"<div style=""
+              position:absolute;
+              top:50%;
+              left:50%;
+              display:inline-block;                 /* importante */
+              -webkit-transform: translate(-50%, -50%) rotate(-30deg);
+              transform: translate(-50%, -50%) rotate(-30deg);
+              -webkit-transform-origin: 50% 50%;
+              transform-origin: 50% 50%;
+              font-size:96px;
+              font-weight:800;
+              color: rgba(200,0,0,0.18);
+              border: 8px solid rgba(200,0,0,0.18);
+              padding: 20px 40px;
+              text-transform:uppercase;
+              z-index:9999;
+              pointer-events:none;
+              white-space:nowrap;"">
+                          CANCELADA
+              </div>"
             : string.Empty;
 
         // Monta mapa de placeholders (agora com warnings)
@@ -248,7 +252,8 @@ public sealed class DanfeHtmlRenderer
             bool isRawHtml =
                 kv.Key == "{{SERV_DESC_HTML}}" ||
                 kv.Key == "{{INF_COMPLEMENTARES}}" ||
-                kv.Key == "{{LOGO_NAME}}";
+                kv.Key == "{{LOGO_NAME}}" ||
+                kv.Key == "{{NFSE_CANCELADA_DIV}}";
 
             string value = isRawHtml ? kv.Value : Helper.HtmlEncode(kv.Value);
             template = template.Replace(kv.Key, value ?? string.Empty);
