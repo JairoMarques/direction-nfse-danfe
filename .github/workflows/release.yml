@@ -35,7 +35,7 @@ jobs:
 
       - name: Pack
         shell: pwsh
-        run: dotnet pack src/Danfe/Danfe.csproj -c Release -o "$env:GITHUB_WORKSPACE\artifacts" /p:PackageVersion=$env:PACKAGE_VERSION /p:Version=$env:PACKAGE_VERSION /p:AssemblyVersion=$env:PACKAGE_VERSION.0 /p:FileVersion=$env:PACKAGE_VERSION.0 /p:InformationalVersion=$env:PACKAGE_VERSION
+        run: dotnet pack src/Danfe/Danfe.csproj -c Release -o "$env:GITHUB_WORKSPACE\artifacts" /p:Version=$env:PACKAGE_VERSION /p:AssemblyVersion=$env:PACKAGE_VERSION.0 /p:FileVersion=$env:PACKAGE_VERSION.0 /p:InformationalVersion=$env:PACKAGE_VERSION
 
       - name: NuGet login (OIDC)
         uses: NuGet/login@v1
