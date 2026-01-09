@@ -15,6 +15,7 @@
     <PackageId>Direction.NFSe.Danfe</PackageId>
     <Authors>Direction Systems Ltda.; Jairo Marques</Authors>
     <Company>Direction Systems Ltda.</Company>
+    <Copyright>Copyright © Direction Systems Ltda. 2026</Copyright>
     <Description>Biblioteca .NET para gerar DANFSe (PDF) a partir do XML da Nota Fiscal de Serviço Nacional (NFSe/DPS), sem depender de endpoint externo.</Description>
     <RepositoryUrl>https://github.com/JairoMarques/direction-nfse-danfe</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
