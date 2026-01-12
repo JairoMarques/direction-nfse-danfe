@@ -62,6 +62,11 @@ public sealed class DanfeHtmlRenderer
         decimal vServico = infDps.valores?.vServPrest?.vServ ?? 0m;
         if (infDps.valores?.vServPrest?.vServ == null) warnings.FieldMissing("vServPrest.vServ", "infNFSe.DPS.InfDPS.valores.vServPrest.vServ", "0,00");
 
+        decimal vDescCond = infDps.valores?.vDescCondIncond?.vDescCond ?? 0M;
+        decimal vDescIncond = infDps.valores?.vDescCondIncond?.vDescIncond ?? 0M;
+        decimal vTotalRet = valores?.vTotalRet ?? 0M;
+        decimal vRetPisCofins = (infDps.valores?.trib?.tribFed?.piscofins?.vPis ?? 0M) + (infDps.valores?.trib?.tribFed?.piscofins?.vCofins ?? 0M);
+
         string chaveAcesso = inf.Id!.Substring(3);
         if (string.IsNullOrWhiteSpace(chaveAcesso)) warnings.FieldMissing("chaveAcesso", "infNFSe.Id", string.Empty);
 
@@ -104,6 +109,13 @@ public sealed class DanfeHtmlRenderer
         else if (municipioPrestador == null)
             warnings.MunicipioNotFound("infNFSe.DPS.InfDPS.serv.locPrest.cLocPrestacao");
 
+        var cLocIncid = inf.cLocIncid;
+        var municpioISSQN = cLocIncid != null ? MunicipiosIbge.GetMunicipio(Int32.Parse(cLocIncid)) : null;
+        if (cLocPrest == null)
+            warnings.FieldMissing("cLocIncid", "infNFSe.cLocIncid", "-");
+        else if (municpioISSQN == null)
+            warnings.MunicipioNotFound("infNFSe.cLocIncid");
+
         var logoBase64 = Helper.GetLogo(Path.Combine(AppContext.BaseDirectory, municipioPrestador?.LogoPath ?? string.Empty));
 
         // Logo da nfse
@@ -111,11 +123,19 @@ public sealed class DanfeHtmlRenderer
 
         // Caminhos/valores auxiliares
         int? tpRetIssqn = infDps.valores?.trib?.tribMun?.tpRetISSQN;
+        if (tpRetIssqn == null || tpRetIssqn.Value == 0) //verificação necessária pois alguns xml simplesmente não preenchem o BM
+            tpRetIssqn = infDps.valores?.trib?.tribMun?.BM?.tpRetISSQN;
         int? opSimpNac = infDps.prest?.regTrib?.opSimpNac;
 
         decimal? vAliqAplic = valores?.pAliqAplic;
         decimal? vIssqn = valores?.vISSQN;
         decimal? vLiq = valores?.vLiq;
+        decimal? vIRRF = infDps.valores?.trib?.tribFed?.vRetIRRF;
+        decimal? vCOFINS = infDps.valores?.trib?.tribFed?.piscofins?.vCofins;
+        decimal? vPIS = infDps.valores?.trib?.tribFed?.piscofins?.vPis;
+        decimal? vCP = infDps.valores?.trib?.tribFed?.vRetCP;
+        decimal? vCSLL = infDps.valores?.trib?.tribFed?.vRetCSLL;
+        decimal? vTotTribFed = infDps.valores?.trib?.totTrib?.vTotTrib?.vTotTribFed;
 
         // Verifica ses a NFSe está cancelada
         string canceladaDiv = isCancelled
@@ -173,7 +193,8 @@ public sealed class DanfeHtmlRenderer
 
             // Prestador
             ["{{PREST_SERV}}"] = GetDescricaoEmitente(infDps.tpEmit),
-            ["{{PREST_CNPJ}}"] = DanfeFallback.OrDash(Helper.FormatCnpj(infDps.prest?.CNPJ), warnings, fieldName: "CNPJ Prestador", path: "infNFSe.DPS.InfDPS.prest.CNPJ"),
+            ["{{PREST_CNPJ}}"] = !string.IsNullOrEmpty(infDps.prest?.CPF) ? DanfeFallback.OrDash(Helper.FormatCpf(infDps.prest?.CPF), warnings, fieldName: "CNPJ Prestador", path: "infNFSe.DPS.InfDPS.prest.CPF")
+                : DanfeFallback.OrDash(Helper.FormatCnpj(infDps.prest?.CNPJ), warnings, fieldName: "CNPJ Prestador", path: "infNFSe.DPS.InfDPS.prest.CNPJ"),
             ["{{PREST_IM}}"] = DanfeFallback.OrDash(infDps.prest?.IM, warnings, "IM Prestador", "infNFSe.DPS.InfDPS.prest.IM"),
             ["{{PREST_RAZAO}}"] = DanfeFallback.OrDash(inf.emit?.xNome, warnings, "xNome Prestador", "infNFSe.emit.xNome"),
             ["{{PREST_ENDERECO}}"] = DanfeFallback.OrDash(Helper.BuildEndereco(inf.emit?.enderNac), warnings, "Endereço Prestador", "infNFSe.emit.enderNac"),
@@ -185,7 +206,8 @@ public sealed class DanfeHtmlRenderer
             ["{{PREST_REGIME_SN}}"] = GetDescricaoRegimeSimples(infDps.prest?.regTrib?.regApTribSN),
 
             // Tomador
-            ["{{TOMA_CNPJ}}"] = DanfeFallback.OrDash(Helper.FormatCnpj(infDps.toma?.CNPJ), warnings, "CNPJ Tomador", "infNFSe.DPS.InfDPS.toma.CNPJ"),
+            ["{{TOMA_CNPJ}}"] = !string.IsNullOrEmpty(infDps.toma?.CPF) ? DanfeFallback.OrDash(Helper.FormatCpf(infDps.toma?.CPF), warnings, fieldName: "CNPJ Tomador", path: "infNFSe.DPS.InfDPS.toma.CPF")
+                : DanfeFallback.OrDash(Helper.FormatCnpj(infDps.toma?.CNPJ), warnings, "CNPJ Tomador", "infNFSe.DPS.InfDPS.toma.CNPJ"),
             ["{{TOMA_IM}}"] = DanfeFallback.OrDash(infDps.toma?.IM),
             ["{{TOMA_RAZAO}}"] = DanfeFallback.OrDash(infDps.toma?.xNome, warnings, "xNome Tomador", "infNFSe.DPS.InfDPS.toma.xNome"),
             ["{{TOMA_ENDERECO}}"] = DanfeFallback.OrDash(Helper.BuildEndereco(infDps.toma?.end), warnings, "Endereço Tomador", "infNFSe.DPS.InfDPS.toma.end"),
@@ -200,42 +222,44 @@ public sealed class DanfeHtmlRenderer
             ["{{SERV_NBS}}"] = DanfeFallback.OrDash(infDps.serv?.cServ?.cNBS.ToString(), warnings, "cNBS", "infNFSe.DPS.InfDPS.serv.cServ.cNBS"),
             ["{{SERV_DESC_HTML}}"] = Helper.BuildDescricaoServicoHtml(infDps.serv?.cServ?.xDescServ),
             ["{{SERV_LOCAL}}"] = DanfeFallback.OrDash(municipioPrestador?.NomeComUf, warnings, "Município Prestação", "MunicipiosIbge.GetMunicipio(cLocPrestacao).NomeComUf"),
-            ["{{SERV_PAIS}}"] = "-", // TODO
+            ["{{SERV_PAIS}}"] = DanfeFallback.OrDash(infDps.serv?.locPrest?.cPaisPrestacao, warnings, "País da Prestação", "infNFSe.DPS.InfDPS.serv.locPrest.cPaisPrestacao"),
 
             // Tributação Municipal
             ["{{ISS_TRIBUTACAO}}"] = GetDescricaoTributacao(infDps.valores?.trib?.tribMun?.tribISSQN),
-            ["{{ISS_PAIS}}"] = "-",
-            ["{{ISS_MUN_INC}}"] = DanfeFallback.OrDash(municipioPrestador?.NomeComUf, warnings, "Município Incidência", "MunicipiosIbge.GetMunicipio(cLocPrestacao).NomeComUf"),
+            //TO DO: verificar se esse pais é o de prestação ou do tomador
+            ["{{ISS_PAIS}}"] = DanfeFallback.OrDash(infDps.toma?.end?.endExt?.cPais, warnings, "País Resultado da Prestação do Serviço", "infNFSe.DPS.InfDPS.toma.end.endExt.cPais"),
+            ["{{ISS_MUN_INC}}"] = DanfeFallback.OrDash(municpioISSQN?.NomeComUf, warnings, "Município Incidência", "MunicipiosIbge.GetMunicipio(cLocIncid).NomeComUf"),
             ["{{ISS_REGIME}}"] = GetDescricaoRegimeEspecial(infDps.prest?.regTrib?.regEspTrib),
-            ["{{ISS_OPERACAO}}"] = "-",
-            ["{{ISS_SUSPENSAO}}"] = "Não",
-            ["{{ISS_PROCESSO}}"] = "-",
-            ["{{ISS_BENEFICIO}}"] = "-",
-            ["{{ISS_DESC_INCOND}}"] = "-",
-            ["{{ISS_DEDUCOES}}"] = "-",
-            ["{{ISS_CALCULO}}"] = "-",
+            ["{{ISS_OPERACAO}}"] = GetDescricaoTipoImunidade(infDps.valores?.trib?.tribMun?.tpImunidade),
+            ["{{ISS_SUSPENSAO}}"] = GetDescricaoTipoSuspensaoISSQN(infDps.valores?.trib?.tribMun?.exigSusp?.tpSusp),
+            ["{{ISS_PROCESSO}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.tribMun?.exigSusp?.nProcesso, warnings, "Número Processo Suspensão", "infNFSe.DPS.InfDPS.valores.trib.tribMun.exigSusp.nProcesso"),
+            ["{{ISS_BENEFICIO}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.tribMun?.BM?.nBM.ToString(), warnings, "Benefício Municipal", "infNFSe.DPS.InfDPS.valores.trib.tribMun.BM.nBM"),
+            ["{{ISS_DESC_INCOND}}"] = DanfeFallback.OrCurrency(infDps.valores?.vDescCondIncond?.vDescIncond, ptBR, warnings, "vDescIncond", "infNFSe.valores.vDescCondIncond.vDescIncond"),
+            ["{{ISS_DEDUCOES}}"] = DanfeFallback.OrCurrency(infDps.valores?.vDedRed?.vDR, ptBR, warnings, "vDR", "infNFSe.valores.vDedRed.vDR"),
+            ["{{ISS_CALCULO}}"] = DanfeFallback.OrCurrency(infDps.valores?.trib?.tribMun?.BM?.vRedBCBM, ptBR, warnings, "vRedBCBM", "infNFSe.valores.trib.tribMun.BM.vRedBCBM"), //TO DO: verificar no futuro se Calculo do BM realmente se refere a esse campo
             ["{{ISS_BC}}"] = (tpRetIssqn == 2 || opSimpNac == 1) ? vServico.ToString("C", ptBR) : "-",
             ["{{ISS_ALIQ}}"] = (tpRetIssqn == 2 || opSimpNac == 1) ? DanfeFallback.OrPercent(vAliqAplic, ptBR, warnings, "pAliqAplic", "infNFSe.valores.pAliqAplic") : "-",
             ["{{ISS_RETENCAO}}"] = GetDescricaoRetencao(tpRetIssqn),
             ["{{ISS_APURADO}}"] = (tpRetIssqn == 2 || opSimpNac == 1) ? DanfeFallback.OrCurrency(vIssqn, ptBR, warnings, "vISSQN", "infNFSe.valores.vISSQN") : "-",
 
-            // Tributação Federal (TODO)
-            ["{{FED_IRRF}}"] = "-",
-            ["{{FED_PIS}}"] = "-",
-            ["{{FED_COFINS}}"] = "-",
-            ["{{FED_CSLL}}"] = "-",
-            ["{{FED_CP}}"] = "-",
-            ["{{FED_RET_PISCOFINS}}"] = "-",
-            ["{{FED_TOTAL}}"] = "-",
+            // Tributação Federal
+            ["{{FED_IRRF}}"] = DanfeFallback.OrCurrency(vIRRF, ptBR, warnings, "vIRRF", "infDps.valores.trib.tribFed.vRetIRRF"),
+            ["{{FED_PIS}}"] = DanfeFallback.OrCurrency(vPIS, ptBR, warnings, "vPIS", "infNFSe.valores.trib.tribFed.piscofins.vPis"),
+            ["{{FED_COFINS}}"] = DanfeFallback.OrCurrency(vCOFINS, ptBR, warnings, "vCOFINS", "infDps.valores.trib.tribFed.piscofins.vCofins"),
+            ["{{FED_CSLL}}"] = DanfeFallback.OrCurrency(vCSLL, ptBR, warnings, "vCSLL", "infDps.valores.trib.tribFed.vRetCSLL"),
+            ["{{FED_CP}}"] = DanfeFallback.OrCurrency(vCP, ptBR, warnings, "vCP", "infDps.valores.trib.tribFed.vRetCP"),
+            ["{{FED_RET_PISCOFINS}}"] = GetDescricaoTipoRetencaoPisCofins(infDps.valores?.trib?.tribFed?.piscofins?.tpRetPisCofins),
+            ["{{FED_TOTAL}}"] = DanfeFallback.OrCurrency(vTotTribFed, ptBR, warnings, "vTotTribFed", "infDps.valores.trib.totTrib.vTotTrib.vTotTribFed"),
 
             // Valores
             ["{{VALOR_SERVICO}}"] = vServico.ToString("C", ptBR),
             ["{{VALOR_LIQUIDO}}"] = DanfeFallback.OrCurrency(vLiq, ptBR, warnings, "vLiq", "infNFSe.valores.vLiq"),
-            ["{{DESC_COND}}"] = "R$",
-            ["{{DESC_INCOND}}"] = "R$",
+            ["{{DESC_COND}}"] = vDescCond != 0 ? vDescCond.ToString("C", ptBR) : "R$",
+            ["{{DESC_INCOND}}"] = vDescIncond != 0 ? vDescIncond.ToString("C", ptBR) : "R$",
             ["{{ISS_RETIDO}}"] = (tpRetIssqn == 2) ? DanfeFallback.OrCurrency(vIssqn, ptBR, warnings, "vISSQN", "infNFSe.valores.vISSQN") : "-",
-            ["{{FED_RETIDOS}}"] = (tpRetIssqn == 2) ? "R$ 0,00" : "-",
-            ["{{PISCOFINS_RET}}"] = "-",
+            //["{{FED_RETIDOS}}"] = (tpRetIssqn == 2) ? "R$ 0,00" : "-",
+            ["{{FED_RETIDOS}}"] = (tpRetIssqn == 2 || tpRetIssqn == 3) ? (vTotalRet - (vIssqn ?? 0M)).ToString("C", ptBR) : vTotalRet.ToString("C", ptBR),
+            ["{{PISCOFINS_RET}}"] = vRetPisCofins != 0 ? vRetPisCofins.ToString("C", ptBR) : "-",
 
             // Totais tributos
             ["{{TOT_FED}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribFed.ToString(CultureInfo.InvariantCulture)),
@@ -291,7 +315,6 @@ public sealed class DanfeHtmlRenderer
         return DanfeFallback.OrDash(mun.NomeComUf, warnings, "NomeComUf", path);
     }
 
-
     private string GetDescricaoRetencao(int? tpRetISSQN)
     {
         switch (tpRetISSQN)
@@ -302,6 +325,31 @@ public sealed class DanfeHtmlRenderer
                 return "Retido pelo Tomador";
             case 3:
                 return "Retido pelo Intermediario";
+            default:
+                return "-";
+        }
+    }
+
+    private string GetDescricaoTipoRetencaoPisCofins(int? tpRetPisCofins)
+    {
+        /*
+           Tipo de retenção ao do PIS/COFINS:
+
+            1 - PIS/COFINS Retido;
+            2 - PIS/COFINS Não Retido;
+            3 - PIS Retido/COFINS Não Retido;
+            4 - PIS Não Retido/COFINS Retido;
+         */
+        switch (tpRetPisCofins)
+        {
+            case 1:
+                return "PIS/COFINS Retido";
+            case 2:
+                return "PIS/COFINS Não Retido";
+            case 3:
+                return "PIS Retido/COFINS Não Retido";
+            case 4:
+                return "PIS Não Retido/COFINS Retido";
             default:
                 return "-";
         }
@@ -401,6 +449,57 @@ public sealed class DanfeHtmlRenderer
                 return "Profissional Autônomo";
             case 6:
                 return "Sociedade de Profissionais";
+            default:
+                return "-";
+        }
+    }
+
+    private string GetDescricaoTipoImunidade(int? tpImunidade)
+    {
+        /*
+           Tipos de Imunidades municipais:
+            0 - Imunidade (tipo não informado na nota de origem);
+            1 - Patrimônio, renda ou serviços, uns dos outros (CF88, Art 150, VI, a);
+            2 - Entidades religiosas e templos de qualquer culto, inclusive suas organizações assistenciais e beneficentes (CF88, Art 150, VI, b);
+            3 - Patrimônio, renda ou serviços dos partidos políticos, inclusive suas fundações, das entidades sindicais dos trabalhadores, das instituições de educação e de assistência social, sem fins lucrativos, atendidos os requisitos da lei (CF88, Art 150, VI, c);
+            4 - Livros, jornais, periódicos e o papel destinado a sua impressão (CF88, Art 150, VI, d);
+            5 - Fonogramas e videofonogramas musicais produzidos no Brasil contendo obras musicais ou literomusicais de autores brasileiros e/ou obras em geral interpretadas por artistas brasileiros bem como os suportes materiais ou arquivos digitais que os contenham, salvo na etapa de replicação industrial de mídias ópticas de leitura a laser.   (CF88, Art 150, VI, e);
+         */
+        switch (tpImunidade)
+        {
+            case 0:
+                return "Nenhum";
+            case 1:
+                return "Patrimônio, renda ou serviços, uns dos outros";
+            case 2:
+                return "Entidades religiosas e templos de qualquer culto";
+            case 3:
+                return "Patrimônio, renda ou serviços dos partidos políticos";
+            case 4:
+                return "Livros, jornais, periódicos e o papel destinado a sua impressão";
+            case 5:
+                return "Fonogramas e videofonogramas musicais produzidos no Brasil";
+            default:
+                return "-";
+        }
+    }
+
+    private string GetDescricaoTipoSuspensaoISSQN(int? tpSusp)
+    {
+        /*
+           Opção para Exigibilidade Suspensa:
+
+            1 - Exigibilidade do ISSQN Suspensa por Decisão Judicial;
+            2 - Exigibilidade do ISSQN Suspensa por Processo Administrativo;
+         */
+        switch (tpSusp)
+        {
+            case 0:
+                return "Não";
+            case 1:
+                return "Suspensa por Decisão Judicial";
+            case 2:
+                return "Suspensa por Processo Administrativo";
             default:
                 return "-";
         }
