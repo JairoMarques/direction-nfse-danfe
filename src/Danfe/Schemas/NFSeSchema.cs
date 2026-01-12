@@ -352,6 +352,12 @@ namespace Direction.NFSe.Danfe
     {
         public int tribISSQN { get; set; }
         public int tpRetISSQN { get; set; }
+        public decimal pAliq { get; set; }
+        // Usado automaticamente pelo XmlSerializer para não serializar quando 0
+        public bool ShouldSerializepAliq()
+        {
+            return pAliq != 0;
+        }
         public string? cPaisResult { get; set; }
         public int? tpImunidade { get; set; }
         public ExigSusp? exigSusp { get; set; }
