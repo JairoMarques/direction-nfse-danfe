@@ -64,8 +64,6 @@ public sealed class DanfeHtmlRenderer
 
         decimal vDescCond = infDps.valores?.vDescCondIncond?.vDescCond ?? 0M;
         decimal vDescIncond = infDps.valores?.vDescCondIncond?.vDescIncond ?? 0M;
-        decimal vTotalRet = valores?.vTotalRet ?? 0M;
-        decimal vRetPisCofins = (infDps.valores?.trib?.tribFed?.piscofins?.vPis ?? 0M) + (infDps.valores?.trib?.tribFed?.piscofins?.vCofins ?? 0M);
 
         string chaveAcesso = inf.Id!.Substring(3);
         if (string.IsNullOrWhiteSpace(chaveAcesso)) warnings.FieldMissing("chaveAcesso", "infNFSe.Id", string.Empty);
@@ -126,6 +124,7 @@ public sealed class DanfeHtmlRenderer
         if (tpRetIssqn == null || tpRetIssqn.Value == 0) //verificação necessária pois alguns xml simplesmente não preenchem o BM
             tpRetIssqn = infDps.valores?.trib?.tribMun?.BM?.tpRetISSQN;
         int? opSimpNac = infDps.prest?.regTrib?.opSimpNac;
+        int? tpRetPisCofins = infDps.valores?.trib?.tribFed?.piscofins?.tpRetPisCofins;
 
         decimal? vAliqAplic = valores?.pAliqAplic;
         decimal? vIssqn = valores?.vISSQN;
@@ -135,7 +134,30 @@ public sealed class DanfeHtmlRenderer
         decimal? vPIS = infDps.valores?.trib?.tribFed?.piscofins?.vPis;
         decimal? vCP = infDps.valores?.trib?.tribFed?.vRetCP;
         decimal? vCSLL = infDps.valores?.trib?.tribFed?.vRetCSLL;
+
         decimal? vTotTribFed = infDps.valores?.trib?.totTrib?.vTotTrib?.vTotTribFed;
+        if (vTotTribFed == null || (vTotTribFed.HasValue && vTotTribFed.Value == 0M)) //nem sempre o objeto totalizador é informado no xml
+            vTotTribFed = (vIRRF ?? 0M) + (vPIS ?? 0M) + (vCOFINS ?? 0M) + (vCP ?? 0M) + (vCSLL ?? 0M);
+
+        decimal vTotalRetFed = (vIRRF ?? 0M) + (vCP ?? 0M) + (vCSLL ?? 0M);
+
+        decimal vRetPisCofins = 0M;
+        switch (tpRetPisCofins)
+        {
+            case 1: // 1 - PIS/COFINS Retido
+                vRetPisCofins = (vPIS ?? 0M) + (vPIS ?? 0M);
+                break;
+            case 2: // 2 - PIS / COFINS Não Retido
+            default:
+                vRetPisCofins = 0M;
+                break;
+            case 3: // 3 - PIS Retido / COFINS Não Retido
+                vRetPisCofins = (vPIS ?? 0M);
+                break;
+            case 4: // 4 - PIS Não Retido/ COFINS Retido;
+                vRetPisCofins = (vCOFINS ?? 0M);
+                break;
+        }
 
         // Verifica ses a NFSe está cancelada
         string canceladaDiv = isCancelled
@@ -258,7 +280,7 @@ public sealed class DanfeHtmlRenderer
             ["{{DESC_INCOND}}"] = vDescIncond != 0 ? vDescIncond.ToString("C", ptBR) : "R$",
             ["{{ISS_RETIDO}}"] = (tpRetIssqn == 2) ? DanfeFallback.OrCurrency(vIssqn, ptBR, warnings, "vISSQN", "infNFSe.valores.vISSQN") : "-",
             //["{{FED_RETIDOS}}"] = (tpRetIssqn == 2) ? "R$ 0,00" : "-",
-            ["{{FED_RETIDOS}}"] = (tpRetIssqn == 2 || tpRetIssqn == 3) ? (vTotalRet - (vIssqn ?? 0M)).ToString("C", ptBR) : vTotalRet.ToString("C", ptBR),
+            ["{{FED_RETIDOS}}"] = vTotalRetFed == 0M ? "-" : vTotalRetFed.ToString("C", ptBR),
             ["{{PISCOFINS_RET}}"] = vRetPisCofins != 0 ? vRetPisCofins.ToString("C", ptBR) : "-",
 
             // Totais tributos
