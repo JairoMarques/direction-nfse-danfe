@@ -145,7 +145,7 @@ public sealed class DanfeHtmlRenderer
         switch (tpRetPisCofins)
         {
             case 1: // 1 - PIS/COFINS Retido
-                vRetPisCofins = (vPIS ?? 0M) + (vPIS ?? 0M);
+                vRetPisCofins = (vPIS ?? 0M) + (vCOFINS ?? 0M);
                 break;
             case 2: // 2 - PIS / COFINS Não Retido
             default:
