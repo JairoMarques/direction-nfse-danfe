@@ -15,7 +15,7 @@ namespace Direction.NFSe.Danfe
         public static string HtmlEncode(string s) =>
             WebUtility.HtmlEncode(s ?? string.Empty);
 
-        public static string BuildEndereco(Endereco? end)
+        public static string BuildEndereco(EndSimples? end)
         {
             if (end == null) return "-";
             var sb = new StringBuilder();
@@ -59,6 +59,16 @@ namespace Direction.NFSe.Danfe
             if (serv?.cServ == null) return "";
 
             var sb = new StringBuilder();
+
+            if (serv.infoCompl != null)
+            {
+                if (!string.IsNullOrEmpty(serv.infoCompl.idDocTec))
+                    sb.Append($"Identificador de Responsabilidade Técnica: {serv.infoCompl.idDocTec} \n");
+
+                if (!string.IsNullOrEmpty(serv.infoCompl.xInfComp))
+                    sb.Append($"<b>Inf Cont:</b> {serv.infoCompl.xInfComp} | ");
+            }
+
             if (serv.cServ.cNBS != 0)
             {
                 sb.Append($"<b>NBS:</b> {serv.cServ.cNBS}");
@@ -90,6 +100,14 @@ namespace Direction.NFSe.Danfe
             if (digits.Length == 14)
                 return Convert.ToUInt64(digits).ToString(@"00\.000\.000\/0000\-00");
             return cnpj!;
+        }
+        public static string FormatCpf(string? cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf)) return "-";
+            var digits = OnlyDigits(cpf!);
+            if (digits.Length == 11)
+                return Convert.ToUInt64(digits).ToString(@"000\.000\.000\-00");
+            return cpf!;
         }
 
         public static string FormatCep(string? cep)
