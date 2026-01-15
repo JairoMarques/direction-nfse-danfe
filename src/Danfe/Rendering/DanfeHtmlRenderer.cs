@@ -289,7 +289,7 @@ public sealed class DanfeHtmlRenderer
             ["{{TOT_MUN}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribMun.ToString(CultureInfo.InvariantCulture)),
 
             // Inf complementares
-            ["{{INF_COMPLEMENTARES}}"] = Helper.BuildInfComplementares(infDps.serv)
+            ["{{INF_COMPLEMENTARES}}"] = Helper.BuildInfComplementares(infDps.serv, infDps.subst)
         };
 
         // Aplica os replaces
