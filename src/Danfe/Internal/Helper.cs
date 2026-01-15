@@ -54,11 +54,16 @@ namespace Direction.NFSe.Danfe
             return encoded.Replace("\r\n", "<br/>").Replace("\n", "<br/>");
         }
 
-        public static string BuildInfComplementares(Servico? serv)
+        public static string BuildInfComplementares(Servico? serv, NFSeSubstituida? subst)
         {
             if (serv?.cServ == null) return "";
 
             var sb = new StringBuilder();
+
+            if (subst != null)
+            {
+                sb.Append($"<b>NFSe Subst:</b> {subst.chSubstda} | ");
+            }
 
             if (serv.infoCompl != null)
             {
