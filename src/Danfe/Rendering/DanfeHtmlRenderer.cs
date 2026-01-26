@@ -46,8 +46,8 @@ public sealed class DanfeHtmlRenderer
         if (infDps == null) throw new ArgumentException("NFSe.infNFSe.DPS.InfDPS não pode ser nulo", nameof(nfse));
         if (string.IsNullOrWhiteSpace(inf.Id)) throw new ArgumentException("NFSe.infNFSe.Id não pode ser nulo/vazio", nameof(nfse));
 
-        string numeroNfse = inf.nNFSe.ToString();
-        string numeroDps = infDps.nDPS.ToString();
+        string numeroNfse = inf.nNFSe ?? "";
+        string numeroDps = infDps.nDPS;
         string serieDps = infDps.serie.ToString();
 
         DateTime? competencia = Helper.TryParseDate(infDps.dCompet);

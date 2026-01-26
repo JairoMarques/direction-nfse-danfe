@@ -19,7 +19,7 @@ namespace Direction.NFSe.Danfe
         public string? Id { get; set; }
         public string? xLocEmi { get; set; }
         public string? xLocPrestacao { get; set; }
-        public int nNFSe { get; set; }
+        public string? nNFSe { get; set; }
         public string? cLocIncid { get; set; }
         public string? xLocIncid { get; set; }
         public string? xTribNac { get; set; }
@@ -101,7 +101,7 @@ namespace Direction.NFSe.Danfe
         public string? dhEmi { get; set; }
         public string? verAplic { get; set; }
         public int serie { get; set; }
-        public int nDPS { get; set; }
+        public string nDPS { get; set; } = "0";
         public string? dCompet { get; set; }
         public int tpEmit { get; set; }
         public int? cMotivoEmisTI { get; set; }
