@@ -183,6 +183,9 @@ public sealed class DanfeHtmlRenderer
               </div>"
             : string.Empty;
 
+        bool hasTomador = infDps.toma != null;
+        bool hasIntermediario = infDps.interm != null;
+
         // Monta mapa de placeholders (agora com warnings)
         var map = new Dictionary<string, string>
         {
@@ -191,7 +194,7 @@ public sealed class DanfeHtmlRenderer
             // Fonts
             ["{{FONT_FAMILY}}"] = _options.FontFamily ?? "Verdana, Helvetica, sans-serif;",
             ["{{FONT_SIZE}}"] = _options.FontSize ?? "12px;",
-            ["{{FONT_SIZE_HEADER}}"] = _options.FontSize ?? "14px;",
+            ["{{FONT_SIZE_HEADER}}"] = _options.FontSize ?? "13px;",
             ["{{FONT_SIZE_QRCODE}}"] = _options.FontSize ?? "11px;",
             // Logos
             ["{{NFSE_LOGO}}"] = logoNfse ?? TransparentPixelBase64,
@@ -227,16 +230,9 @@ public sealed class DanfeHtmlRenderer
             ["{{PREST_SIMPLES}}"] = GetDescricaoPrestadorSimples(infDps.prest?.regTrib?.opSimpNac),
             ["{{PREST_REGIME_SN}}"] = GetDescricaoRegimeSimples(infDps.prest?.regTrib?.regApTribSN),
 
-            // Tomador
-            ["{{TOMA_CNPJ}}"] = !string.IsNullOrEmpty(infDps.toma?.CPF) ? DanfeFallback.OrDash(Helper.FormatCpf(infDps.toma?.CPF), warnings, fieldName: "CNPJ Tomador", path: "infNFSe.DPS.InfDPS.toma.CPF")
-                : DanfeFallback.OrDash(Helper.FormatCnpj(infDps.toma?.CNPJ), warnings, "CNPJ Tomador", "infNFSe.DPS.InfDPS.toma.CNPJ"),
-            ["{{TOMA_IM}}"] = DanfeFallback.OrDash(infDps.toma?.IM),
-            ["{{TOMA_RAZAO}}"] = DanfeFallback.OrDash(infDps.toma?.xNome, warnings, "xNome Tomador", "infNFSe.DPS.InfDPS.toma.xNome"),
-            ["{{TOMA_ENDERECO}}"] = DanfeFallback.OrDash(Helper.BuildEndereco(infDps.toma?.end), warnings, "Endereço Tomador", "infNFSe.DPS.InfDPS.toma.end"),
-            ["{{TOMA_CEP}}"] = DanfeFallback.OrDash(Helper.FormatCep(infDps.toma?.end?.endNac?.CEP), warnings, "CEP Tomador", "infNFSe.DPS.InfDPS.toma.end.endNac.CEP"),
-            ["{{TOMA_CMUN}}"] = ResolveMunicipioNomeComUf(infDps.toma?.end?.endNac?.cMun, warnings, "infNFSe.DPS.InfDPS.toma.end.endNac.cMun"),
-            ["{{TOMA_EMAIL}}"] = DanfeFallback.OrDash(infDps.toma?.email, warnings, "Email Tomador", "infNFSe.DPS.InfDPS.toma.email"),
-            ["{{TOMA_FONE}}"] = DanfeFallback.OrDash(Helper.FormatTelefone(infDps.toma?.fone), warnings, "Fone Tomador", "infNFSe.DPS.InfDPS.toma.fone"),
+            // Intermediário é incluso condicionalmente mais abaixo
+            
+            // Tomador é incluso condicionalmente mais abaixo
 
             // Serviço
             ["{{SERV_CTRIBNAC}}"] = DanfeFallback.OrDash(descricaoTributoNacional, warnings, "Descrição Tributo Nacional", "infNFSe.DPS.InfDPS.serv.cServ.cTribNac | infNFSe.xTribNac").Limit(80),
@@ -291,6 +287,15 @@ public sealed class DanfeHtmlRenderer
             // Inf complementares
             ["{{INF_COMPLEMENTARES}}"] = Helper.BuildInfComplementares(infDps.serv, infDps.subst)
         };
+        // Tomador (condicional)
+        foreach (var kv in BuildTomadorMap(infDps, warnings))
+            map[kv.Key] = kv.Value;
+
+        // Intermediário (condicional)
+        foreach (var kv in BuildIntermediarioMap(infDps, warnings))
+            map[kv.Key] = kv.Value;
+
+        template = Helper.ApplyConditionalSections(template, hasTomador, hasIntermediario);
 
         // Aplica os replaces
         foreach (var kv in map)
@@ -316,6 +321,121 @@ public sealed class DanfeHtmlRenderer
         }
 
         return (template, warnings.Warnings);
+    }
+    private Dictionary<string, string> BuildTomadorMap(InfDPS infDps, DanfeWarningCollector warnings)
+    {
+        if (infDps.toma == null)
+            return new Dictionary<string, string>();
+
+        return new Dictionary<string, string>
+        {
+            ["{{TOMA_CNPJ}}"] =
+                !string.IsNullOrEmpty(infDps.toma.CPF)
+                    ? DanfeFallback.OrDash(
+                        Helper.FormatCpf(infDps.toma.CPF),
+                        warnings,
+                        "CNPJ Tomador",
+                        "infNFSe.DPS.InfDPS.toma.CPF")
+                    : DanfeFallback.OrDash(
+                        Helper.FormatCnpj(infDps.toma.CNPJ),
+                        warnings,
+                        "CNPJ Tomador",
+                        "infNFSe.DPS.InfDPS.toma.CNPJ"),
+
+            ["{{TOMA_IM}}"] = DanfeFallback.OrDash(infDps.toma.IM),
+            ["{{TOMA_RAZAO}}"] = DanfeFallback.OrDash(
+                infDps.toma.xNome,
+                warnings,
+                "xNome Tomador",
+                "infNFSe.DPS.InfDPS.toma.xNome"),
+
+            ["{{TOMA_ENDERECO}}"] = DanfeFallback.OrDash(
+                Helper.BuildEndereco(infDps.toma.end),
+                warnings,
+                "Endereço Tomador",
+                "infNFSe.DPS.InfDPS.toma.end"),
+
+            ["{{TOMA_CEP}}"] = DanfeFallback.OrDash(
+                Helper.FormatCep(infDps.toma.end?.endNac?.CEP),
+                warnings,
+                "CEP Tomador",
+                "infNFSe.DPS.InfDPS.toma.end.endNac.CEP"),
+
+            ["{{TOMA_CMUN}}"] = ResolveMunicipioNomeComUf(
+                infDps.toma.end?.endNac?.cMun,
+                warnings,
+                "infNFSe.DPS.InfDPS.toma.end.endNac.cMun"),
+
+            ["{{TOMA_EMAIL}}"] = DanfeFallback.OrDash(
+                infDps.toma.email,
+                warnings,
+                "Email Tomador",
+                "infNFSe.DPS.InfDPS.toma.email"),
+
+            ["{{TOMA_FONE}}"] = DanfeFallback.OrDash(
+                Helper.FormatTelefone(infDps.toma.fone),
+                warnings,
+                "Fone Tomador",
+                "infNFSe.DPS.InfDPS.toma.fone")
+        };
+    }
+    private Dictionary<string, string> BuildIntermediarioMap(InfDPS infDps, DanfeWarningCollector warnings)
+    {
+        if (infDps.interm == null)
+            return new Dictionary<string, string>();
+
+        return new Dictionary<string, string>
+        {
+            ["{{INTER_CNPJ}}"] =
+                !string.IsNullOrEmpty(infDps.interm.CPF)
+                    ? DanfeFallback.OrDash(
+                        Helper.FormatCpf(infDps.interm.CPF),
+                        warnings,
+                        "CNPJ Intermediário",
+                        "infNFSe.DPS.InfDPS.interm.CPF")
+                    : DanfeFallback.OrDash(
+                        Helper.FormatCnpj(infDps.interm.CNPJ),
+                        warnings,
+                        "CNPJ Intermediário",
+                        "infNFSe.DPS.InfDPS.interm.CNPJ"),
+
+            ["{{INTER_IM}}"] = DanfeFallback.OrDash(infDps.interm.IM),
+
+            ["{{INTER_RAZAO}}"] = DanfeFallback.OrDash(
+                infDps.interm.xNome,
+                warnings,
+                "xNome Intermediário",
+                "infNFSe.DPS.InfDPS.interm.xNome"),
+
+            ["{{INTER_ENDERECO}}"] = DanfeFallback.OrDash(
+                Helper.BuildEndereco(infDps.interm.end),
+                warnings,
+                "Endereço Intermediário",
+                "infNFSe.DPS.InfDPS.interm.end"),
+
+            ["{{INTER_CEP}}"] = DanfeFallback.OrDash(
+                Helper.FormatCep(infDps.interm.end?.endNac?.CEP),
+                warnings,
+                "CEP Intermediário",
+                "infNFSe.DPS.InfDPS.interm.end.endNac.CEP"),
+
+            ["{{INTER_CMUN}}"] = ResolveMunicipioNomeComUf(
+                infDps.interm.end?.endNac?.cMun,
+                warnings,
+                "infNFSe.DPS.InfDPS.interm.end.endNac.cMun"),
+
+            ["{{INTER_EMAIL}}"] = DanfeFallback.OrDash(
+                infDps.interm.email,
+                warnings,
+                "Email Intermediário",
+                "infNFSe.DPS.InfDPS.interm.email"),
+
+            ["{{INTER_FONE}}"] = DanfeFallback.OrDash(
+                Helper.FormatTelefone(infDps.interm.fone),
+                warnings,
+                "Fone Intermediário",
+                "infNFSe.DPS.InfDPS.interm.fone")
+        };
     }
 
     // Helper local: resolve município do tomador sem explodir e com warning

@@ -263,71 +263,77 @@
           </table>
         </div>
       </div>
+      <!-- ======================= -->
+      <!-- TOMADOR (CONDICIONAL)   -->
+      <!-- ======================= -->
+      <!-- TOMADOR:BEGIN_NOT_IDENTIFIED -->
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- TOMADOR -->
+      <div class="section" style="border-bottom: none; text-align: center; font-size: 14px; font-weight: bold">
+        <span>TOMADOR DO SERVIÇO NÃO IDENTIFICADO NA NFS-e</span>
+      </div>
+      <!-- TOMADOR:END_NOT_IDENTIFIED -->
+      <!-- TOMADOR:BEGIN_IDENTIFIED -->
+      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <div class="section">
         <div class="section-content" style="padding: 1px 6px 6px 6px">
           <table style="width: 100%; border-collapse: collapse">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span
-                  class="label"
-                  style="font-size: {{FONT_SIZE_HEADER}} color: black; font-size: 12px; font-weight: bold"
-                >
+                <span class="label" style="font-size: {{FONT_SIZE_HEADER}}; color: black; font-weight: bold">
                   TOMADOR DO SERVIÇO
                 </span>
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   CNPJ / CPF / NIF
                 </span>
                 <br />
                 {{TOMA_CNPJ}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   Inscrição Municipal
                 </span>
                 <br />
                 {{TOMA_IM}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">Telefone</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Telefone</span>
                 <br />
                 {{TOMA_FONE}}
               </td>
             </tr>
           </table>
+
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
-                  Nome / Nome Empresarial
-                </span>
+              <td style="width: 50%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Nome / Nome Empresarial</span>
                 <br />
                 {{TOMA_RAZAO}}
               </td>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">E-mail</span>
+              <td style="width: 50%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">E-mail</span>
                 <br />
                 {{TOMA_EMAIL}}
               </td>
             </tr>
           </table>
+
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">Endereço</span>
+              <td style="width: 50%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Endereço</span>
                 <br />
                 {{TOMA_ENDERECO}}
               </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">Município</span>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Município</span>
                 <br />
                 {{TOMA_CMUN}}
               </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">CEP</span>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">CEP</span>
                 <br />
                 {{TOMA_CEP}}
               </td>
@@ -335,10 +341,82 @@
           </table>
         </div>
       </div>
+      <!-- TOMADOR:END_IDENTIFIED -->
+      <!-- ============================ -->
+      <!-- INTERMEDIÁRIO (CONDICIONAL)  -->
+      <!-- ============================ -->
+      <!-- INTERMEDIARIO:BEGIN_NOT_IDENTIFIED -->
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <div class="section" style="border-bottom: none; text-align: center; font-size: 14px; font-weight: bold">
         <span>INTERMEDIÁRIO DO SERVIÇO NÃO IDENTIFICADO NA NFS-e</span>
       </div>
+      <!-- INTERMEDIARIO:END_NOT_IDENTIFIED -->
+      <!-- INTERMEDIARIO:BEGIN_IDENTIFIED -->
+      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
+      <div class="section">
+        <div class="section-content" style="padding: 1px 6px 6px 6px">
+          <table style="width: 100%; border-collapse: collapse">
+            <tr>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE_HEADER}}; font-weight: bold">
+                  INTERMEDIÁRIO DO SERVIÇO
+                </span>
+              </td>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">CNPJ / CPF / NIF</span>
+                <br />
+                {{INTER_CNPJ}}
+              </td>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Inscrição Municipal</span>
+                <br />
+                {{INTER_IM}}
+              </td>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Telefone</span>
+                <br />
+                {{INTER_FONE}}
+              </td>
+            </tr>
+          </table>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
+            <tr>
+              <td style="width: 50%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Nome / Nome Empresarial</span>
+                <br />
+                {{INTER_RAZAO}}
+              </td>
+              <td style="width: 50%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">E-mail</span>
+                <br />
+                {{INTER_EMAIL}}
+              </td>
+            </tr>
+          </table>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
+            <tr>
+              <td style="width: 50%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Endereço</span>
+                <br />
+                {{INTER_ENDERECO}}
+              </td>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Município</span>
+                <br />
+                {{INTER_CMUN}}
+              </td>
+              <td style="width: 25%">
+                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">CEP</span>
+                <br />
+                {{INTER_CEP}}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <!-- INTERMEDIARIO:END_IDENTIFIED -->
       <div style="border-top: 1px solid #000; margin: 0 5px"></div>
       <!-- SERVIÇO -->
       <div class="section" style="border-bottom: none; height: 310px; max-height: 310px">
