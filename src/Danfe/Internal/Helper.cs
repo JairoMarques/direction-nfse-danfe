@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using QRCoder;
 
 namespace Direction.NFSe.Danfe
@@ -175,6 +176,38 @@ namespace Direction.NFSe.Danfe
 
             var imageBytes = File.ReadAllBytes(logoPath);
             return Convert.ToBase64String(imageBytes);
+        }
+
+        internal static string RemoveBlock(string html, string beginMarker, string endMarker)
+        {
+            // Remove inclusive markers
+            var pattern = $"{Regex.Escape(beginMarker)}.*?{Regex.Escape(endMarker)}";
+            return Regex.Replace(html, pattern, "", RegexOptions.Singleline);
+        }
+
+        public static string ApplyConditionalSections(string html, bool hasTomador, bool hasIntermediario)
+        {
+            // TOMADOR
+            if (hasTomador)
+            {
+                html = RemoveBlock(html, "<!-- TOMADOR:BEGIN_NOT_IDENTIFIED -->", "<!-- TOMADOR:END_NOT_IDENTIFIED -->");
+            }
+            else
+            {
+                html = RemoveBlock(html, "<!-- TOMADOR:BEGIN_IDENTIFIED -->", "<!-- TOMADOR:END_IDENTIFIED -->");
+            }
+
+            // INTERMEDIÁRIO
+            if (hasIntermediario)
+            {
+                html = RemoveBlock(html, "<!-- INTERMEDIARIO:BEGIN_NOT_IDENTIFIED -->", "<!-- INTERMEDIARIO:END_NOT_IDENTIFIED -->");
+            }
+            else
+            {
+                html = RemoveBlock(html, "<!-- INTERMEDIARIO:BEGIN_IDENTIFIED -->", "<!-- INTERMEDIARIO:END_IDENTIFIED -->");
+            }
+
+            return html;
         }
     }
 }
