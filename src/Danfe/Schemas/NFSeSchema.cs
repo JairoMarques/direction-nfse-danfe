@@ -338,10 +338,7 @@ namespace Direction.NFSe.Danfe
         [XmlArray("documentos")]
         public List<Documento>? documentos { get; set; }
 
-        public bool ShouldSerializedocumentos()
-        {
-            return documentos != null && documentos.Count > 0;
-        }
+        public bool ShouldSerializedocumentos() => documentos != null && documentos.Count > 0;
     }
 
     public class Valores
@@ -386,10 +383,7 @@ namespace Direction.NFSe.Danfe
         public decimal pAliq { get; set; }
 
         // Você já tinha essa regra; mantida.
-        public bool ShouldSerializepAliq()
-        {
-            return pAliq != 0;
-        }
+        public bool ShouldSerializepAliq() => pAliq != 0;
 
         public string? cPaisResult { get; set; }
         public int? tpImunidade { get; set; }
@@ -453,10 +447,9 @@ namespace Direction.NFSe.Danfe
         public VTotTrib? vTotTrib { get; set; }
         public PTotTrib? pTotTrib { get; set; }
         public int? indTotTrib { get; set; }
-        public decimal pTotTribSN { get; set; }
-
-        // ShouldSerialize para INT?
         public bool ShouldSerializeindTotTrib() => indTotTrib.HasValue;
+        public decimal pTotTribSN { get; set; }
+        public bool ShouldSerializepTotTribSN() => pTotTribSN != 0;
     }
 
     public class IBSCBS

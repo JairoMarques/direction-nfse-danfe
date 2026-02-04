@@ -279,10 +279,7 @@ public sealed class DanfeHtmlRenderer
             ["{{FED_RETIDOS}}"] = vTotalRetFed == 0M ? "-" : vTotalRetFed.ToString("C", ptBR),
             ["{{PISCOFINS_RET}}"] = vRetPisCofins != 0 ? vRetPisCofins.ToString("C", ptBR) : "-",
 
-            // Totais tributos
-            ["{{TOT_FED}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribFed.ToString(CultureInfo.InvariantCulture)),
-            ["{{TOT_EST}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribEst.ToString(CultureInfo.InvariantCulture)),
-            ["{{TOT_MUN}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribMun.ToString(CultureInfo.InvariantCulture)),
+            // Totais tributos é inserido condicionalmente mais abaixo
 
             // Inf complementares
             ["{{INF_COMPLEMENTARES}}"] = Helper.BuildInfComplementares(infDps.serv, infDps.subst)
@@ -293,6 +290,10 @@ public sealed class DanfeHtmlRenderer
 
         // Intermediário (condicional)
         foreach (var kv in BuildIntermediarioMap(infDps, warnings))
+            map[kv.Key] = kv.Value;
+
+        // Totais tributos (condicional)
+        foreach (var kv in BuildTotaisTributosMap(infDps, ptBR, warnings))
             map[kv.Key] = kv.Value;
 
         template = Helper.ApplyConditionalSections(template, hasTomador, hasIntermediario);
@@ -438,6 +439,34 @@ public sealed class DanfeHtmlRenderer
         };
     }
 
+    private Dictionary<string, string> BuildTotaisTributosMap(InfDPS infDps, CultureInfo ptBR, DanfeWarningCollector warnings)
+    {
+        if (infDps.valores?.trib?.totTrib?.pTotTribSN != null && infDps.valores?.trib?.totTrib?.pTotTribSN != 0)
+            return new Dictionary<string, string>
+            {
+                // Totais tributos (Simples Nacional)
+                ["{{TOT_FED}}"] = "-",
+                ["{{TOT_EST}}"] = "-",
+                ["{{TOT_MUN}}"] = "-"
+            };
+
+        if (infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribFed != null)
+            return new Dictionary<string, string>
+            {
+                // Totais tributos (percentual)
+                ["{{TOT_FED}}"] = DanfeFallback.OrPercent(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribFed, ptBR, warnings, "pTotTribFed", "infDps.valores.trib.totTrib.pTotTrib.pTotTribFed"),
+                ["{{TOT_EST}}"] = DanfeFallback.OrPercent(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribEst, ptBR, warnings, "pTotTribEst", "infDps.valores.trib.totTrib.pTotTrib.pTotTribEst"),
+                ["{{TOT_MUN}}"] = DanfeFallback.OrPercent(infDps.valores?.trib?.totTrib?.pTotTrib?.pTotTribMun, ptBR, warnings, "pTotTribMun", "infDps.valores.trib.totTrib.pTotTrib.pTotTribMun"),
+            };
+
+        return new Dictionary<string, string>
+        {
+            // Totais tributos (valores)
+            ["{{TOT_FED}}"] = DanfeFallback.OrCurrency(infDps.valores?.trib?.totTrib?.vTotTrib?.vTotTribFed, ptBR, warnings, "vTotTribFed", "infDps.valores.trib.totTrib.vTotTrib.vTotTribFed"),
+            ["{{TOT_EST}}"] = DanfeFallback.OrCurrency(infDps.valores?.trib?.totTrib?.vTotTrib?.vTotTribEst, ptBR, warnings, "vTotTribEst", "infDps.valores.trib.totTrib.vTotTrib.vTotTribEst"),
+            ["{{TOT_MUN}}"] = DanfeFallback.OrCurrency(infDps.valores?.trib?.totTrib?.vTotTrib?.vTotTribMun, ptBR, warnings, "vTotTribMun", "infDps.valores.trib.totTrib.vTotTrib.vTotTribMun"),
+        };
+    }
     // Helper local: resolve município do tomador sem explodir e com warning
     private static string ResolveMunicipioNomeComUf(int? cMun, DanfeWarningCollector warnings, string path)
     {
