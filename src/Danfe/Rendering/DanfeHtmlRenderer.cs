@@ -266,8 +266,8 @@ public sealed class DanfeHtmlRenderer
             ["{{FED_COFINS}}"] = DanfeFallback.OrCurrency(vCOFINS, ptBR, warnings, "vCOFINS", "infDps.valores.trib.tribFed.piscofins.vCofins"),
             ["{{FED_CSLL}}"] = DanfeFallback.OrCurrency(vCSLL, ptBR, warnings, "vCSLL", "infDps.valores.trib.tribFed.vRetCSLL"),
             ["{{FED_CP}}"] = DanfeFallback.OrCurrency(vCP, ptBR, warnings, "vCP", "infDps.valores.trib.tribFed.vRetCP"),
-            ["{{FED_RET_PISCOFINS}}"] = GetDescricaoTipoRetencaoPisCofins(infDps.valores?.trib?.tribFed?.piscofins?.tpRetPisCofins),
-            ["{{FED_TOTAL}}"] = DanfeFallback.OrCurrency(vTotTribFed, ptBR, warnings, "vTotTribFed", "infDps.valores.trib.totTrib.vTotTrib.vTotTribFed"),
+            ["{{FED_RET_PISCOFINSCSLL}}"] = GetDescricaoTipoRetencaoPisCofins(infDps.valores?.trib?.tribFed?.piscofins?.tpRetPisCofins),
+            //["{{FED_TOTAL}}"] = DanfeFallback.OrCurrency(vTotTribFed, ptBR, warnings, "vTotTribFed", "infDps.valores.trib.totTrib.vTotTrib.vTotTribFed"), //não existe mais no layout novo
 
             // Valores
             ["{{VALOR_SERVICO}}"] = vServico.ToString("C", ptBR),
@@ -275,7 +275,6 @@ public sealed class DanfeHtmlRenderer
             ["{{DESC_COND}}"] = vDescCond != 0 ? vDescCond.ToString("C", ptBR) : "R$",
             ["{{DESC_INCOND}}"] = vDescIncond != 0 ? vDescIncond.ToString("C", ptBR) : "R$",
             ["{{ISS_RETIDO}}"] = (tpRetIssqn == 2) ? DanfeFallback.OrCurrency(vIssqn, ptBR, warnings, "vISSQN", "infNFSe.valores.vISSQN") : "-",
-            //["{{FED_RETIDOS}}"] = (tpRetIssqn == 2) ? "R$ 0,00" : "-",
             ["{{FED_RETIDOS}}"] = vTotalRetFed == 0M ? "-" : vTotalRetFed.ToString("C", ptBR),
             ["{{PISCOFINS_RET}}"] = vRetPisCofins != 0 ? vRetPisCofins.ToString("C", ptBR) : "-",
 
@@ -506,21 +505,39 @@ public sealed class DanfeHtmlRenderer
         /*
            Tipo de retenção ao do PIS/COFINS:
 
+            0 - PIS/COFINS/CSLL Não Retidos;
             1 - PIS/COFINS Retido;
             2 - PIS/COFINS Não Retido;
-            3 - PIS Retido/COFINS Não Retido;
-            4 - PIS Não Retido/COFINS Retido;
+            3 - PIS/COFINS/CSLL Retidos;
+            4 - PIS/COFINS Retidos, CSLL Não Retido;
+            5 - PIS Retido, COFINS/CSLL Não Retido;
+            6 - COFINS Retido, PIS/CSLL Não Retido;
+            7 - PIS Não Retido, COFINS/CSLL Retidos;
+            8 - PIS/COFINS Não Retidos, CSLL Retido;
+            9 - COFINS Não Retido, PIS/CSLL Retidos;
          */
         switch (tpRetPisCofins)
         {
+            case 0:
+                return "PIS/COFINS/CSLL Não Retidos";
             case 1:
                 return "PIS/COFINS Retido";
             case 2:
                 return "PIS/COFINS Não Retido";
             case 3:
-                return "PIS Retido/COFINS Não Retido";
+                return "PIS/COFINS/CSLL Retidos";
             case 4:
-                return "PIS Não Retido/COFINS Retido";
+                return "PIS/COFINS Retidos, CSLL Não Retido";
+            case 5:
+                return "PIS Retido, COFINS/CSLL Não Retido";
+            case 6:
+                return "COFINS Retido, PIS/CSLL Não Retido";
+            case 7:
+                return "PIS Não Retido, COFINS/CSLL Retidos";
+            case 8:
+                return "PIS/COFINS Não Retidos, CSLL Retido";
+            case 9:
+                return "COFINS Não Retido, PIS/CSLL Retidos";
             default:
                 return "-";
         }
