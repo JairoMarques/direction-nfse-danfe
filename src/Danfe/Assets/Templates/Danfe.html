@@ -626,43 +626,44 @@
                 {{FED_IRRF}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">CP</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Contribuição Previdenciária - Retida</span>
                 <br />
                 {{FED_CP}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">CSLL</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Contribuições Sociais - Retidas</span>
                 <br />
                 {{FED_CSLL}}
               </td>
-              <td style="vertical-align: top; width: 25%"></td>
+              <td style="vertical-align: top; width: 25%">
+                  <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
+                      Descrição Contrib. Sociais - Retidas
+                  </span>
+                  <br />
+                  {{FED_RET_PISCOFINSCSLL}}
+              </td>
             </tr>
           </table>
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">PIS</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">PIS - Debito Apuração Própria</span>
                 <br />
                 {{FED_PIS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">COFINS</span>
+                  <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">COFINS - Debito Apuração Própria</span>
                 <br />
                 {{FED_COFINS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Retenção do PIS/COFINS
-                </span>
-                <br />
-                {{FED_RET_PISCOFINS}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
+                <!--<span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   Total Tributação Federal
                 </span>
                 <br />
-                {{FED_TOTAL}}
+                {{FED_TOTAL}}-->
               </td>
             </tr>
           </table>
@@ -714,14 +715,14 @@
             <tr>
               <td style="vertical-align: top; width: 25%">
                 <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  IRRF, CP, CSLL - Retidos
+                  Total das Retenções Federais
                 </span>
                 <br />
                 {{FED_RETIDOS}}
               </td>
               <td style="vertical-align: top; width: 50%">
                 <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  PIS/COFINS Retidos
+                  PIS/COFINS - Débito de Apur. Própria
                 </span>
                 <br />
                 {{PISCOFINS_RET}}
