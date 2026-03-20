@@ -163,7 +163,7 @@
               >
                 <img alt="Logo" class="qrcode" src="{{QRCODE_SRC}}" style="width: 100%; height: 100%" />
               </div>
-              <div style="font-size: {{FONT_SIZE_QRCODE}} text-align: left">
+              <div style="font-size: {{FONT_SIZE_QRCODE}}; text-align: left">
                 A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela consulta da chave
                 de acesso no portal nacional da NFS-e
               </div>
@@ -180,7 +180,7 @@
               <td style="vertical-align: top; width: 25%">
                 <span
                   class="label"
-                  style="font-size: {{FONT_SIZE_HEADER}} color: black; font-size: 12px; font-weight: bold"
+                  style="font-size: {{FONT_SIZE_HEADER}}; color: black; font-weight: bold"
                 >
                   EMITENTE DA NFS-e
                 </span>
@@ -188,21 +188,21 @@
                 {{PREST_SERV}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   CNPJ / CPF / NIF
                 </span>
                 <br />
                 {{PREST_CNPJ}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   Inscrição Municipal
                 </span>
                 <br />
                 {{PREST_IM}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">Telefone</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Telefone</span>
                 <br />
                 {{PREST_FONE}}
               </td>
@@ -211,14 +211,14 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   Nome / Nome Empresarial
                 </span>
                 <br />
                 {{PREST_RAZAO}}
               </td>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">E-mail</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">E-mail</span>
                 <br />
                 {{PREST_EMAIL}}
               </td>
@@ -227,17 +227,17 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">Endereço</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Endereço</span>
                 <br />
                 {{PREST_ENDERECO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">Município</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Município</span>
                 <br />
                 {{PREST_MUNICIPIO}}
               </td>
               <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">CEP</span>
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">CEP</span>
                 <br />
                 {{PREST_CEP}}
               </td>
@@ -246,14 +246,14 @@
           <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
             <tr>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   Simples Nacional na Data de Competência
                 </span>
                 <br />
                 {{PREST_SIMPLES}}
               </td>
               <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}} color: black; font-weight: bold">
+                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   Regime de Apuração Tributária pelo SN
                 </span>
                 <br />
@@ -720,12 +720,14 @@
                 <br />
                 {{FED_RETIDOS}}
               </td>
-              <td style="vertical-align: top; width: 50%">
+              <td style="vertical-align: top; width: 25%">
                 <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
                   PIS/COFINS - Débito de Apur. Própria
                 </span>
                 <br />
-                {{PISCOFINS_RET}}
+                {{PISCOFINS_DEB}}
+              </td>
+              <td style="vertical-align: top; width: 25%">
               </td>
               <td style="vertical-align: top; width: 25%">
                 <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
