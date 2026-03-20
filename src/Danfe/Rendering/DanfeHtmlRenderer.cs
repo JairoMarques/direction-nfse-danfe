@@ -140,7 +140,7 @@ public sealed class DanfeHtmlRenderer
             vTotTribFed = (vIRRF ?? 0M) + (vPIS ?? 0M) + (vCOFINS ?? 0M) + (vCP ?? 0M) + (vCSLL ?? 0M);
 
         decimal vTotalRetFed = (vIRRF ?? 0M) + (vCP ?? 0M) + (vCSLL ?? 0M);
-        decimal vDebPisCofins =  (vPIS ?? 0M) + (vCOFINS ?? 0M);
+        decimal vDebPisCofins = (vPIS ?? 0M) + (vCOFINS ?? 0M);
 
         // Verifica ses a NFSe está cancelada
         string canceladaDiv = isCancelled
