@@ -364,7 +364,7 @@ namespace Direction.NFSe.Danfe
 
     public class BM
     {
-        public int nBM { get; set; }
+        public long nBM { get; set; }
         public decimal? vRedBCBM { get; set; }
         public decimal? pRedBCBM { get; set; }
         public int tpRetISSQN { get; set; }
