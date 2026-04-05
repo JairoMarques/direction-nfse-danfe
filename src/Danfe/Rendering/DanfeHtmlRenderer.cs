@@ -236,12 +236,12 @@ public sealed class DanfeHtmlRenderer
             ["{{ISS_PROCESSO}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.tribMun?.exigSusp?.nProcesso, warnings, "Número Processo Suspensão", "infNFSe.DPS.InfDPS.valores.trib.tribMun.exigSusp.nProcesso"),
             ["{{ISS_BENEFICIO}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.tribMun?.BM?.nBM.ToString(), warnings, "Benefício Municipal", "infNFSe.DPS.InfDPS.valores.trib.tribMun.BM.nBM"),
             ["{{ISS_DESC_INCOND}}"] = DanfeFallback.OrCurrency(infDps.valores?.vDescCondIncond?.vDescIncond, ptBR, warnings, "vDescIncond", "infNFSe.valores.vDescCondIncond.vDescIncond"),
-            ["{{ISS_DEDUCOES}}"] = DanfeFallback.OrCurrency(infDps.valores?.vDedRed?.vDR, ptBR, warnings, "vDR", "infNFSe.valores.vDedRed.vDR"),
-            ["{{ISS_CALCULO}}"] = DanfeFallback.OrCurrency(infDps.valores?.trib?.tribMun?.BM?.vRedBCBM, ptBR, warnings, "vRedBCBM", "infNFSe.valores.trib.tribMun.BM.vRedBCBM"), //TO DO: verificar no futuro se Calculo do BM realmente se refere a esse campo
-            ["{{ISS_BC}}"] = (tpRetIssqn == 2 || opSimpNac == 1) ? vServico.ToString("C", ptBR) : "-",
-            ["{{ISS_ALIQ}}"] = (tpRetIssqn == 2 || opSimpNac == 1) ? DanfeFallback.OrPercent(vAliqAplic, ptBR, warnings, "pAliqAplic", "infNFSe.valores.pAliqAplic") : "-",
+            ["{{ISS_DEDUCOES}}"] = DanfeFallback.OrCurrency(inf.valores?.vCalcDR, ptBR, warnings, "vCalcDR", "nfse.infNFSe.valores.vCalcDR"),
+            ["{{ISS_CALCULO}}"] = DanfeFallback.OrCurrency(inf.valores?.vCalcBM, ptBR, warnings, "vCalcBM", "nfse.infNFSe.valores.vCalcBM"),
+            ["{{ISS_BC}}"] = DanfeFallback.OrCurrency(inf.valores?.vBC, ptBR, warnings, "vBC", "nfse.infNFSe.valores.vBC"),
+            ["{{ISS_ALIQ}}"] = DanfeFallback.OrPercent(vAliqAplic, ptBR, warnings, "pAliqAplic", "infNFSe.valores.pAliqAplic"),
             ["{{ISS_RETENCAO}}"] = GetDescricaoRetencao(tpRetIssqn),
-            ["{{ISS_APURADO}}"] = (tpRetIssqn == 2 || opSimpNac == 1) ? DanfeFallback.OrCurrency(vIssqn, ptBR, warnings, "vISSQN", "infNFSe.valores.vISSQN") : "-",
+            ["{{ISS_APURADO}}"] = DanfeFallback.OrCurrency(vIssqn, ptBR, warnings, "vISSQN", "infNFSe.valores.vISSQN"),
 
             // Tributação Federal
             ["{{FED_IRRF}}"] = DanfeFallback.OrCurrency(vIRRF, ptBR, warnings, "vIRRF", "infDps.valores.trib.tribFed.vRetIRRF"),
