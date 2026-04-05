@@ -72,7 +72,7 @@ namespace Direction.NFSe.Danfe
 
             if (subst != null)
             {
-                AppendWithSeparator(sb , $"<b>NFSe Subst:</b> {subst.chSubstda}");
+                AppendWithSeparator(sb, $"<b>NFSe Subst:</b> {subst.chSubstda}");
             }
 
             if (serv.infoCompl != null)
