@@ -55,6 +55,15 @@ namespace Direction.NFSe.Danfe
             return encoded.Replace("\r\n", "<br/>").Replace("\n", "<br/>");
         }
 
+        private static void AppendWithSeparator(StringBuilder sb, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                if (sb.Length > 0) sb.Append(" | ");
+                sb.Append(value);
+            }
+        }
+
         public static string BuildInfComplementares(Servico? serv, NFSeSubstituida? subst)
         {
             if (serv?.cServ == null) return "";
@@ -63,21 +72,21 @@ namespace Direction.NFSe.Danfe
 
             if (subst != null)
             {
-                sb.Append($"<b>NFSe Subst:</b> {subst.chSubstda} | ");
+                AppendWithSeparator(sb, $"<b>NFSe Subst:</b> {subst.chSubstda}");
             }
 
             if (serv.infoCompl != null)
             {
                 if (!string.IsNullOrEmpty(serv.infoCompl.idDocTec))
-                    sb.Append($"Identificador de Responsabilidade Técnica: {serv.infoCompl.idDocTec} \n");
+                    AppendWithSeparator(sb, $"Identificador de Responsabilidade Técnica: {serv.infoCompl.idDocTec} \n");
 
                 if (!string.IsNullOrEmpty(serv.infoCompl.xInfComp))
-                    sb.Append($"<b>Inf Cont:</b> {serv.infoCompl.xInfComp} | ");
+                    AppendWithSeparator(sb, $"<b>Inf Cont:</b> {serv.infoCompl.xInfComp}");
             }
 
             if (serv.cServ.cNBS != 0)
             {
-                sb.Append($"<b>NBS:</b> {serv.cServ.cNBS}");
+                AppendWithSeparator(sb, $"<b>NBS:</b> {serv.cServ.cNBS}");
             }
 
             return sb.Length == 0 ? "-" : sb.ToString();
