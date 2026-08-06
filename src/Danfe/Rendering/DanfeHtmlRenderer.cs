@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -13,14 +14,15 @@ public sealed class DanfeHtmlRenderer
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
 
     private readonly string _templatePath;
+    private readonly string _basePath;
     private readonly DanfeOptions _options;
 
     public DanfeHtmlRenderer(DanfeOptions options)
     {
         _options = options ?? new DanfeOptions();
 
-        var basePath = _options.BasePath ?? AppContext.BaseDirectory;
-        _templatePath = _options.TemplatePath ?? Path.Combine(basePath, "Assets", "Templates", "Danfe.html");
+        _basePath = _options.BasePath ?? AppContext.BaseDirectory;
+        _templatePath = _options.TemplatePath ?? Path.Combine(_basePath, "Assets", "Templates", "Danfe.html");
     }
 
     public (string Html, IReadOnlyList<DanfeWarning> Warnings) RenderInternal(NFSeSchema nfse, DanfeEnvironment environment, DanfeStatus status)
@@ -104,16 +106,18 @@ public sealed class DanfeHtmlRenderer
         }
 
         // Município prestador
-        var cLocPrest = infDps.serv?.locPrest?.cLocPrestacao;
-        var municipioPrestador = cLocPrest != null ? MunicipiosIbge.GetMunicipio(cLocPrest) : null;
-        if (cLocPrest == null)
+        int? cLocPrest = infDps.serv?.locPrest?.cLocPrestacao;
+        var municipioPrestador = cLocPrest is > 0 ? MunicipiosIbge.GetMunicipio(cLocPrest.Value) : null;
+        if (cLocPrest is null or 0)
             warnings.FieldMissing("cLocPrestacao", "infNFSe.DPS.InfDPS.serv.locPrest.cLocPrestacao", "-");
         else if (municipioPrestador == null)
             warnings.MunicipioNotFound("infNFSe.DPS.InfDPS.serv.locPrest.cLocPrestacao");
 
         var cLocIncid = inf.cLocIncid;
-        var municpioISSQN = cLocIncid != null ? MunicipiosIbge.GetMunicipio(Int32.Parse(cLocIncid)) : null;
-        if (cLocPrest == null)
+        var municpioISSQN = int.TryParse(cLocIncid, out var codigoIncidencia)
+            ? MunicipiosIbge.GetMunicipio(codigoIncidencia)
+            : null;
+        if (string.IsNullOrWhiteSpace(cLocIncid))
             warnings.FieldMissing("cLocIncid", "infNFSe.cLocIncid", "-");
         else if (municpioISSQN == null)
             warnings.MunicipioNotFound("infNFSe.cLocIncid");
@@ -121,7 +125,7 @@ public sealed class DanfeHtmlRenderer
         var logoBase64 = GetLogoMunicipio(municipioPrestador);
 
         // Logo da nfse
-        var logoNfse = _options.LogoNFSePath != null ? Helper.GetLogo(_options.LogoNFSePath) : Helper.GetLogo(Path.Combine(AppContext.BaseDirectory, "Assets", "Logos", "nfse.png"));
+        var logoNfse = _options.LogoNFSePath != null ? Helper.GetLogo(_options.LogoNFSePath) : Helper.GetLogo(Path.Combine(_basePath, "Assets", "Logos", "nfse.png"));
 
         // Caminhos/valores auxiliares
         int? tpRetIssqn = infDps.valores?.trib?.tribMun?.tpRetISSQN;
@@ -139,6 +143,28 @@ public sealed class DanfeHtmlRenderer
         decimal? vCP = infDps.valores?.trib?.tribFed?.vRetCP;
         decimal? vCSLL = infDps.valores?.trib?.tribFed?.vRetCSLL;
 
+        var ibsCbsDps = infDps.IBSCBS;
+        var ibsCbs = inf.IBSCBS;
+        var valoresIbsCbs = ibsCbs?.valores;
+        var totaisIbsCbs = ibsCbs?.totCIBS;
+        var tribMun = infDps.valores?.trib?.tribMun;
+        var tpRetPisCofinsValue = infDps.valores?.trib?.tribFed?.piscofins?.tpRetPisCofins;
+
+        decimal? contribuicoesSociaisRetidas = vCSLL;
+        decimal? pisDebitoProprio = vPIS;
+        decimal? cofinsDebitoProprio = vCOFINS;
+        if (tpRetPisCofinsValue == 1)
+        {
+            contribuicoesSociaisRetidas = (vCSLL ?? 0m) + (vPIS ?? 0m) + (vCOFINS ?? 0m);
+            pisDebitoProprio = 0m;
+            cofinsDebitoProprio = 0m;
+        }
+
+        var exclusoesReducaoBase = CalculateIbsCbsExclusions(vDescIncond, valoresIbsCbs?.vCalcReeRepRes, vIssqn, vPIS, vCOFINS);
+        var totalIbsCbs = SumNullable(totaisIbsCbs?.gIBS?.vIBSTot, totaisIbsCbs?.gCBS?.vCBS);
+        var calculoBeneficioMunicipal = inf.valores?.vCalcBM ?? tribMun?.BM?.vRedBCBM;
+        var totalDeducoesReducoes = ResolveIssDeductions(infDps, inf, valoresIbsCbs);
+
         decimal? vTotTribFed = infDps.valores?.trib?.totTrib?.vTotTrib?.vTotTribFed;
         if (vTotTribFed == null || (vTotTribFed.HasValue && vTotTribFed.Value == 0M)) //nem sempre o objeto totalizador é informado no xml
             vTotTribFed = (vIRRF ?? 0M) + (vPIS ?? 0M) + (vCOFINS ?? 0M) + (vCP ?? 0M) + (vCSLL ?? 0M);
@@ -146,58 +172,26 @@ public sealed class DanfeHtmlRenderer
         decimal vTotalRetFed = (vIRRF ?? 0M) + (vCP ?? 0M) + (vCSLL ?? 0M);
         decimal vDebPisCofins = (vPIS ?? 0M) + (vCOFINS ?? 0M);
 
-        // Verifica se a NFSe está cancelada
-        var isCancelled = status == DanfeStatus.Cancelada;
-        string canceladaDiv = isCancelled
-            ? @"<div style=""
-              position:absolute;
-              top:50%;
-              left:50%;
-              display:inline-block;                 /* importante */
-              -webkit-transform: translate(-50%, -50%) rotate(-30deg);
-              transform: translate(-50%, -50%) rotate(-30deg);
-              -webkit-transform-origin: 50% 50%;
-              transform-origin: 50% 50%;
-              font-size:96px;
-              font-weight:800;
-              color: rgba(200,0,0,0.18);
-              border: 8px solid rgba(200,0,0,0.18);
-              padding: 20px 40px;
-              text-transform:uppercase;
-              z-index:9999;
-              pointer-events:none;
-              white-space:nowrap;"">
-                          CANCELADA
-              </div>"
-            : string.Empty;
-
-        // Verifica se a NFSe foi substituída e não cancelada
-        var isSubstituida = status == DanfeStatus.Substituida;
-        string substituidaDiv = isSubstituida
-            ? @"<div style=""
-              position:absolute;
-              top:50%;
-              left:50%;
-              display:inline-block;                 /* importante */
-              -webkit-transform: translate(-50%, -50%) rotate(-30deg);
-              transform: translate(-50%, -50%) rotate(-30deg);
-              -webkit-transform-origin: 50% 50%;
-              transform-origin: 50% 50%;
-              font-size:96px;
-              font-weight:800;
-              color: rgba(200,0,0,0.18);
-              border: 8px solid rgba(200,0,0,0.18);
-              padding: 20px 40px;
-              text-transform:uppercase;
-              z-index:9999;
-              pointer-events:none;
-              white-space:nowrap;"">
-                          SUBSTITUÍDA
-              </div>"
-            : string.Empty;
+        var canceladaDiv = status == DanfeStatus.Cancelada ? BuildWatermark("CANCELADA") : string.Empty;
+        var substituidaDiv = status == DanfeStatus.Substituida ? BuildWatermark("SUBSTITUÍDA") : string.Empty;
 
         bool hasTomador = infDps.toma != null;
         bool hasIntermediario = infDps.interm != null;
+        bool hasDestinatario = ibsCbsDps?.dest != null;
+        bool destinatarioIsTomador = !hasDestinatario && ibsCbsDps?.indDest == 0 && hasTomador;
+        bool showPisCofins = !competencia.HasValue || competencia.Value.Year <= 2026;
+        bool issSubject = tribMun?.tribISSQN != 4;
+        bool showIssOptionalRow1 = infDps.prest?.regTrib?.regEspTrib > 0 ||
+                                   tribMun?.tpImunidade.HasValue == true ||
+                                   tribMun?.exigSusp != null;
+        bool showIssOptionalRow2 = !string.IsNullOrWhiteSpace(inf.valores?.tpBM) ||
+                                   tribMun?.BM?.vRedBCBM.HasValue == true ||
+                                   inf.valores?.vCalcBM.HasValue == true ||
+                                   inf.valores?.vCalcDR.HasValue == true ||
+                                   infDps.valores?.vDedRed != null ||
+                                   valoresIbsCbs?.vDR.HasValue == true ||
+                                   valoresIbsCbs?.vCalcReeRepRes.HasValue == true ||
+                                   infDps.valores?.vDescCondIncond?.vDescIncond.HasValue == true;
 
         // Monta mapa de placeholders (agora com warnings)
         var map = new Dictionary<string, string>
@@ -219,6 +213,9 @@ public sealed class DanfeHtmlRenderer
             // Cabeçalho
             ["{{VALIDADE_JURIDICA}}"] = validade,
             ["{{CHAVE_ACESSO}}"] = DanfeFallback.OrDash(chaveAcesso, warnings, fieldName: "chaveAcesso", path: "infNFSe.Id"),
+            ["{{MUNICIPIO_EMITENTE}}"] = FormatMunicipioUf(inf.xLocEmi, inf.emit?.enderNac?.UF),
+            ["{{AMBIENTE_GERADOR}}"] = inf.ambGer > 0 ? inf.ambGer.ToString(CultureInfo.InvariantCulture) : "-",
+            ["{{TIPO_AMBIENTE}}"] = infDps.tpAmb > 0 ? infDps.tpAmb.ToString(CultureInfo.InvariantCulture) : "-",
 
             // QrCode
             ["{{QRCODE_SRC}}"] = imgQrCodeSrc,
@@ -230,16 +227,19 @@ public sealed class DanfeHtmlRenderer
             ["{{COMPETENCIA}}"] = competencia?.ToString("dd/MM/yyyy") ?? DanfeFallback.OrDash(null, warnings, "dCompet", "infNFSe.DPS.InfDPS.dCompet"),
             ["{{DATA_HORA_EMISSAO}}"] = dhEmissaoNfs?.ToString("dd/MM/yyyy HH:mm:ss") ?? DanfeFallback.OrDash(null, warnings, "dhProc", "infNFSe.dhProc"),
             ["{{DATA_HORA_EMISSAO_DPS}}"] = dhEmissaoDps?.ToString("dd/MM/yyyy HH:mm:ss") ?? DanfeFallback.OrDash(null, warnings, "dhEmi", "infNFSe.DPS.InfDPS.dhEmi"),
+            ["{{EMITENTE_NFSE}}"] = GetDescricaoEmitenteV2(infDps.tpEmit),
+            ["{{SITUACAO_NFSE}}"] = GetDescricaoSituacao(inf.cStat),
+            ["{{FINALIDADE}}"] = GetDescricaoFinalidade(ibsCbsDps?.finNFSe),
 
             // Prestador
             ["{{PREST_SERV}}"] = GetDescricaoEmitente(infDps.tpEmit),
-            ["{{PREST_CNPJ}}"] = !string.IsNullOrEmpty(infDps.prest?.CPF) ? DanfeFallback.OrDash(Helper.FormatCpf(infDps.prest?.CPF), warnings, fieldName: "CNPJ Prestador", path: "infNFSe.DPS.InfDPS.prest.CPF")
-                : DanfeFallback.OrDash(Helper.FormatCnpj(infDps.prest?.CNPJ), warnings, fieldName: "CNPJ Prestador", path: "infNFSe.DPS.InfDPS.prest.CNPJ"),
+            ["{{PREST_CNPJ}}"] = DanfeFallback.OrDash(Helper.FormatTaxIdentifier(infDps.prest?.CNPJ, infDps.prest?.CPF, infDps.prest?.NIF), warnings, fieldName: "CNPJ/CPF/NIF Prestador", path: "infNFSe.DPS.InfDPS.prest"),
             ["{{PREST_IM}}"] = DanfeFallback.OrDash(infDps.prest?.IM, warnings, "IM Prestador", "infNFSe.DPS.InfDPS.prest.IM"),
             ["{{PREST_RAZAO}}"] = DanfeFallback.OrDash(inf.emit?.xNome, warnings, "xNome Prestador", "infNFSe.emit.xNome"),
             ["{{PREST_ENDERECO}}"] = DanfeFallback.OrDash(Helper.BuildEndereco(inf.emit?.enderNac), warnings, "Endereço Prestador", "infNFSe.emit.enderNac"),
             ["{{PREST_MUNICIPIO}}"] = DanfeFallback.OrDash($"{inf.xLocEmi} - {inf.emit?.enderNac?.UF}", warnings, "Município/UF Prestador", "infNFSe.xLocEmi | infNFSe.emit.enderNac.UF"),
             ["{{PREST_CEP}}"] = DanfeFallback.OrDash(Helper.FormatCep(inf.emit?.enderNac?.CEP), warnings, "CEP Prestador", "infNFSe.emit.enderNac.CEP"),
+            ["{{PREST_CODIGO_CEP}}"] = FormatCodigoCep(inf.emit?.enderNac?.cMun, inf.emit?.enderNac?.CEP),
             ["{{PREST_FONE}}"] = DanfeFallback.OrDash(Helper.FormatTelefone(infDps.prest?.fone), warnings, "Fone Prestador", "infNFSe.DPS.InfDPS.prest.fone"),
             ["{{PREST_EMAIL}}"] = DanfeFallback.OrDash(infDps.prest?.email, warnings, "Email Prestador", "infNFSe.DPS.InfDPS.prest.email"),
             ["{{PREST_SIMPLES}}"] = GetDescricaoPrestadorSimples(infDps.prest?.regTrib?.opSimpNac),
@@ -254,6 +254,10 @@ public sealed class DanfeHtmlRenderer
             ["{{SERV_CTRIBMUN}}"] = DanfeFallback.OrDash(descricaoTributoMunicipal, warnings, "Descrição Tributo Municipal", "infNFSe.DPS.InfDPS.serv.cServ.cTribMun | infNFSe.xTribMun").Limit(80),
             ["{{SERV_NBS}}"] = DanfeFallback.OrDash(infDps.serv?.cServ?.cNBS.ToString(), warnings, "cNBS", "infNFSe.DPS.InfDPS.serv.cServ.cNBS"),
             ["{{SERV_DESC_HTML}}"] = Helper.BuildDescricaoServicoHtml(infDps.serv?.cServ?.xDescServ),
+            ["{{SERV_CODIGOS}}"] = $"{FormatTributacaoCode(cTribNac)} / {DanfeFallback.OrDash(cTribMun)}",
+            ["{{SERV_NBS_FORMATADO}}"] = Helper.FormatNbs(infDps.serv?.cServ?.cNBS ?? 0),
+            ["{{SERV_LOCAL_COMPLETO}}"] = JoinSlash(inf.xLocPrestacao ?? municipioPrestador?.Nome, municipioPrestador?.Uf, infDps.serv?.locPrest?.cPaisPrestacao),
+            ["{{SERV_DESCRICAO_TRIBUTACAO}}"] = DanfeFallback.OrDash(FirstNonEmpty(xTribMun, xTribNac).Limit(170), warnings, "Descricao da tributacao", "infNFSe.xTribMun | infNFSe.xTribNac"),
             ["{{SERV_LOCAL}}"] = DanfeFallback.OrDash(municipioPrestador?.NomeComUf, warnings, "Município Prestação", "MunicipiosIbge.GetMunicipio(cLocPrestacao).NomeComUf"),
             ["{{SERV_PAIS}}"] = DanfeFallback.OrDash(infDps.serv?.locPrest?.cPaisPrestacao, warnings, "País da Prestação", "infNFSe.DPS.InfDPS.serv.locPrest.cPaisPrestacao"),
 
@@ -263,13 +267,14 @@ public sealed class DanfeHtmlRenderer
             ["{{ISS_PAIS}}"] = DanfeFallback.OrDash(infDps.toma?.end?.endExt?.cPais, warnings, "País Resultado da Prestação do Serviço", "infNFSe.DPS.InfDPS.toma.end.endExt.cPais"),
             ["{{ISS_MUN_INC}}"] = DanfeFallback.OrDash(municpioISSQN?.NomeComUf, warnings, "Município Incidência", "MunicipiosIbge.GetMunicipio(cLocIncid).NomeComUf"),
             ["{{ISS_REGIME}}"] = GetDescricaoRegimeEspecial(infDps.prest?.regTrib?.regEspTrib),
+            ["{{ISS_MUN_INC_COMPLETO}}"] = JoinSlash(inf.xLocIncid ?? municpioISSQN?.Nome, municpioISSQN?.Uf, infDps.valores?.trib?.tribMun?.cPaisResult),
             ["{{ISS_OPERACAO}}"] = GetDescricaoTipoImunidade(infDps.valores?.trib?.tribMun?.tpImunidade),
             ["{{ISS_SUSPENSAO}}"] = GetDescricaoTipoSuspensaoISSQN(infDps.valores?.trib?.tribMun?.exigSusp?.tpSusp),
             ["{{ISS_PROCESSO}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.tribMun?.exigSusp?.nProcesso, warnings, "Número Processo Suspensão", "infNFSe.DPS.InfDPS.valores.trib.tribMun.exigSusp.nProcesso"),
-            ["{{ISS_BENEFICIO}}"] = DanfeFallback.OrDash(infDps.valores?.trib?.tribMun?.BM?.nBM.ToString(), warnings, "Benefício Municipal", "infNFSe.DPS.InfDPS.valores.trib.tribMun.BM.nBM"),
+            ["{{ISS_BENEFICIO}}"] = GetDescricaoBeneficioMunicipal(inf.valores?.tpBM),
             ["{{ISS_DESC_INCOND}}"] = DanfeFallback.OrCurrency(infDps.valores?.vDescCondIncond?.vDescIncond, ptBR, warnings, "vDescIncond", "infNFSe.valores.vDescCondIncond.vDescIncond"),
-            ["{{ISS_DEDUCOES}}"] = DanfeFallback.OrCurrency(inf.valores?.vCalcDR, ptBR, warnings, "vCalcDR", "nfse.infNFSe.valores.vCalcDR"),
-            ["{{ISS_CALCULO}}"] = DanfeFallback.OrCurrency(inf.valores?.vCalcBM, ptBR, warnings, "vCalcBM", "nfse.infNFSe.valores.vCalcBM"),
+            ["{{ISS_DEDUCOES}}"] = FormatCurrency(totalDeducoesReducoes, ptBR),
+            ["{{ISS_CALCULO}}"] = FormatCurrency(calculoBeneficioMunicipal, ptBR),
             ["{{ISS_BC}}"] = DanfeFallback.OrCurrency(inf.valores?.vBC, ptBR, warnings, "vBC", "nfse.infNFSe.valores.vBC"),
             ["{{ISS_ALIQ}}"] = DanfeFallback.OrPercent(vAliqAplic, ptBR, warnings, "pAliqAplic", "infNFSe.valores.pAliqAplic"),
             ["{{ISS_RETENCAO}}"] = GetDescricaoRetencao(tpRetIssqn),
@@ -277,9 +282,9 @@ public sealed class DanfeHtmlRenderer
 
             // Tributação Federal
             ["{{FED_IRRF}}"] = DanfeFallback.OrCurrency(vIRRF, ptBR, warnings, "vIRRF", "infDps.valores.trib.tribFed.vRetIRRF"),
-            ["{{FED_PIS}}"] = DanfeFallback.OrCurrency(vPIS, ptBR, warnings, "vPIS", "infNFSe.valores.trib.tribFed.piscofins.vPis"),
-            ["{{FED_COFINS}}"] = DanfeFallback.OrCurrency(vCOFINS, ptBR, warnings, "vCOFINS", "infDps.valores.trib.tribFed.piscofins.vCofins"),
-            ["{{FED_CSLL}}"] = DanfeFallback.OrCurrency(vCSLL, ptBR, warnings, "vCSLL", "infDps.valores.trib.tribFed.vRetCSLL"),
+            ["{{FED_PIS}}"] = DanfeFallback.OrCurrency(pisDebitoProprio, ptBR, warnings, "vPIS", "infNFSe.valores.trib.tribFed.piscofins.vPis"),
+            ["{{FED_COFINS}}"] = DanfeFallback.OrCurrency(cofinsDebitoProprio, ptBR, warnings, "vCOFINS", "infDps.valores.trib.tribFed.piscofins.vCofins"),
+            ["{{FED_CSLL}}"] = DanfeFallback.OrCurrency(contribuicoesSociaisRetidas, ptBR, warnings, "Contribuicoes Sociais Retidas", "infDps.valores.trib.tribFed"),
             ["{{FED_CP}}"] = DanfeFallback.OrCurrency(vCP, ptBR, warnings, "vCP", "infDps.valores.trib.tribFed.vRetCP"),
             ["{{FED_RET_PISCOFINSCSLL}}"] = GetDescricaoTipoRetencaoPisCofins(infDps.valores?.trib?.tribFed?.piscofins?.tpRetPisCofins),
             //["{{FED_TOTAL}}"] = DanfeFallback.OrCurrency(vTotTribFed, ptBR, warnings, "vTotTribFed", "infDps.valores.trib.totTrib.vTotTrib.vTotTribFed"), //não existe mais no layout novo
@@ -293,10 +298,28 @@ public sealed class DanfeHtmlRenderer
             ["{{FED_RETIDOS}}"] = vTotalRetFed == 0M ? "-" : vTotalRetFed.ToString("C", ptBR),
             ["{{PISCOFINS_DEB}}"] = vDebPisCofins != 0 ? vDebPisCofins.ToString("C", ptBR) : "-",
 
+            ["{{IBSCBS_CST_CLASS}}"] = JoinSlash(ibsCbsDps?.valores?.trib?.gIBSCBS?.CST, ibsCbsDps?.valores?.trib?.gIBSCBS?.cClassTrib),
+            ["{{IBSCBS_INCIDENCIA}}"] = JoinSlash(ibsCbsDps?.cIndOp, ibsCbs?.cLocalidadeIncid, ibsCbs?.xLocalidadeIncid, ResolveUf(ibsCbs?.cLocalidadeIncid)),
+            ["{{IBSCBS_EXCLUSOES}}"] = DanfeFallback.OrCurrency(exclusoesReducaoBase, ptBR, warnings, "Exclusoes e reducoes da base de calculo", "infNFSe.IBSCBS"),
+            ["{{IBSCBS_BC}}"] = DanfeFallback.OrCurrency(valoresIbsCbs?.vBC, ptBR, warnings, "vBC IBS/CBS", "infNFSe.IBSCBS.valores.vBC"),
+            ["{{IBSCBS_REDUCOES}}"] = JoinSlash(FormatPercent(valoresIbsCbs?.uf?.pRedAliqUF, ptBR), FormatPercent(valoresIbsCbs?.mun?.pRedAliqMun, ptBR), FormatPercent(valoresIbsCbs?.fed?.pRedAliqCBS, ptBR)),
+            ["{{IBSCBS_ALIQUOTAS_IBS}}"] = JoinSlash(FormatPercent(valoresIbsCbs?.uf?.pIBSUF, ptBR), FormatPercent(valoresIbsCbs?.mun?.pIBSMun, ptBR)),
+            ["{{IBSCBS_ALIQ_EFET_MUN}}"] = FormatPercent(valoresIbsCbs?.mun?.pAliqEfetMun, ptBR),
+            ["{{IBSCBS_VALOR_MUN}}"] = FormatCurrency(totaisIbsCbs?.gIBS?.gIBSMunTot?.vIBSMun, ptBR),
+            ["{{IBSCBS_ALIQ_EFET_UF}}"] = FormatPercent(valoresIbsCbs?.uf?.pAliqEfetUF, ptBR),
+            ["{{IBSCBS_VALOR_UF}}"] = FormatCurrency(totaisIbsCbs?.gIBS?.gIBSUFTot?.vIBSUF, ptBR),
+            ["{{IBSCBS_TOTAL_IBS}}"] = FormatCurrency(totaisIbsCbs?.gIBS?.vIBSTot, ptBR),
+            ["{{IBSCBS_ALIQ_CBS}}"] = FormatPercent(valoresIbsCbs?.fed?.pCBS, ptBR),
+            ["{{IBSCBS_ALIQ_EFET_CBS}}"] = FormatPercent(valoresIbsCbs?.fed?.pAliqEfetCBS, ptBR),
+            ["{{IBSCBS_TOTAL_CBS}}"] = FormatCurrency(totaisIbsCbs?.gCBS?.vCBS, ptBR),
+            ["{{TOTAL_RETENCOES}}"] = FormatCurrency(inf.valores?.vTotalRet, ptBR),
+            ["{{IBSCBS_TOTAL}}"] = FormatCurrency(totalIbsCbs, ptBR),
+            ["{{IBSCBS_VALOR_TOTAL}}"] = FormatCurrency(totaisIbsCbs?.vTotNF, ptBR),
+
             // Totais tributos é inserido condicionalmente mais abaixo
 
             // Inf complementares
-            ["{{INF_COMPLEMENTARES}}"] = Helper.BuildInfComplementares(infDps.serv, infDps.subst)
+            ["{{INF_COMPLEMENTARES}}"] = Helper.BuildInfComplementares(inf, ptBR)
         };
         // Tomador (condicional)
         foreach (var kv in BuildTomadorMap(infDps, warnings))
@@ -306,11 +329,23 @@ public sealed class DanfeHtmlRenderer
         foreach (var kv in BuildIntermediarioMap(infDps, warnings))
             map[kv.Key] = kv.Value;
 
+        foreach (var kv in BuildDestinatarioMap(infDps, warnings))
+            map[kv.Key] = kv.Value;
+
         // Totais tributos (condicional)
         foreach (var kv in BuildTotaisTributosMap(infDps, ptBR, warnings))
             map[kv.Key] = kv.Value;
 
-        template = Helper.ApplyConditionalSections(template, hasTomador, hasIntermediario);
+        template = Helper.ApplyConditionalSections(
+            template,
+            hasTomador,
+            hasIntermediario,
+            hasDestinatario,
+            destinatarioIsTomador,
+            showPisCofins,
+            issSubject,
+            showIssOptionalRow1,
+            showIssOptionalRow2);
 
         // Aplica os replaces
         foreach (var kv in map)
@@ -341,11 +376,11 @@ public sealed class DanfeHtmlRenderer
 
     private string? GetLogoMunicipio(MunicipiosIbge.Municipio? municipio)
     {
-        var imageCodigoIbge = Path.Combine(AppContext.BaseDirectory, "Assets", "Logos", $"{municipio?.CodigoIbge}.png");
+        var imageCodigoIbge = Path.Combine(_basePath, "Assets", "Logos", $"{municipio?.CodigoIbge}.png");
         if (File.Exists(imageCodigoIbge))
             return Helper.GetLogo(imageCodigoIbge);
 
-        return Helper.GetLogo(Path.Combine(AppContext.BaseDirectory, municipio?.LogoPath ?? string.Empty));
+        return Helper.GetLogo(Path.Combine(_basePath, municipio?.LogoPath ?? string.Empty));
     }
     private Dictionary<string, string> BuildTomadorMap(InfDPS infDps, DanfeWarningCollector warnings)
     {
@@ -354,18 +389,11 @@ public sealed class DanfeHtmlRenderer
 
         return new Dictionary<string, string>
         {
-            ["{{TOMA_CNPJ}}"] =
-                !string.IsNullOrEmpty(infDps.toma.CPF)
-                    ? DanfeFallback.OrDash(
-                        Helper.FormatCpf(infDps.toma.CPF),
-                        warnings,
-                        "CNPJ Tomador",
-                        "infNFSe.DPS.InfDPS.toma.CPF")
-                    : DanfeFallback.OrDash(
-                        Helper.FormatCnpj(infDps.toma.CNPJ),
-                        warnings,
-                        "CNPJ Tomador",
-                        "infNFSe.DPS.InfDPS.toma.CNPJ"),
+            ["{{TOMA_CNPJ}}"] = DanfeFallback.OrDash(
+                Helper.FormatTaxIdentifier(infDps.toma.CNPJ, infDps.toma.CPF, infDps.toma.NIF),
+                warnings,
+                "CNPJ/CPF/NIF Tomador",
+                "infNFSe.DPS.InfDPS.toma"),
 
             ["{{TOMA_IM}}"] = DanfeFallback.OrDash(infDps.toma.IM),
             ["{{TOMA_RAZAO}}"] = DanfeFallback.OrDash(
@@ -381,15 +409,17 @@ public sealed class DanfeHtmlRenderer
                 "infNFSe.DPS.InfDPS.toma.end"),
 
             ["{{TOMA_CEP}}"] = DanfeFallback.OrDash(
-                Helper.FormatCep(infDps.toma.end?.endNac?.CEP),
+                FormatPostalCode(infDps.toma.end),
                 warnings,
                 "CEP Tomador",
-                "infNFSe.DPS.InfDPS.toma.end.endNac.CEP"),
+                "infNFSe.DPS.InfDPS.toma.end"),
 
-            ["{{TOMA_CMUN}}"] = ResolveMunicipioNomeComUf(
-                infDps.toma.end?.endNac?.cMun,
+            ["{{TOMA_CODIGO_CEP}}"] = FormatLocationCodeAndPostalCode(infDps.toma.end),
+
+            ["{{TOMA_CMUN}}"] = ResolveMunicipioOrExternal(
+                infDps.toma.end,
                 warnings,
-                "infNFSe.DPS.InfDPS.toma.end.endNac.cMun"),
+                "infNFSe.DPS.InfDPS.toma.end"),
 
             ["{{TOMA_EMAIL}}"] = DanfeFallback.OrDash(
                 infDps.toma.email,
@@ -411,18 +441,11 @@ public sealed class DanfeHtmlRenderer
 
         return new Dictionary<string, string>
         {
-            ["{{INTER_CNPJ}}"] =
-                !string.IsNullOrEmpty(infDps.interm.CPF)
-                    ? DanfeFallback.OrDash(
-                        Helper.FormatCpf(infDps.interm.CPF),
-                        warnings,
-                        "CNPJ Intermediário",
-                        "infNFSe.DPS.InfDPS.interm.CPF")
-                    : DanfeFallback.OrDash(
-                        Helper.FormatCnpj(infDps.interm.CNPJ),
-                        warnings,
-                        "CNPJ Intermediário",
-                        "infNFSe.DPS.InfDPS.interm.CNPJ"),
+            ["{{INTER_CNPJ}}"] = DanfeFallback.OrDash(
+                Helper.FormatTaxIdentifier(infDps.interm.CNPJ, infDps.interm.CPF, infDps.interm.NIF),
+                warnings,
+                "CNPJ/CPF/NIF Intermediário",
+                "infNFSe.DPS.InfDPS.interm"),
 
             ["{{INTER_IM}}"] = DanfeFallback.OrDash(infDps.interm.IM),
 
@@ -439,15 +462,17 @@ public sealed class DanfeHtmlRenderer
                 "infNFSe.DPS.InfDPS.interm.end"),
 
             ["{{INTER_CEP}}"] = DanfeFallback.OrDash(
-                Helper.FormatCep(infDps.interm.end?.endNac?.CEP),
+                FormatPostalCode(infDps.interm.end),
                 warnings,
                 "CEP Intermediário",
-                "infNFSe.DPS.InfDPS.interm.end.endNac.CEP"),
+                "infNFSe.DPS.InfDPS.interm.end"),
 
-            ["{{INTER_CMUN}}"] = ResolveMunicipioNomeComUf(
-                infDps.interm.end?.endNac?.cMun,
+            ["{{INTER_CODIGO_CEP}}"] = FormatLocationCodeAndPostalCode(infDps.interm.end),
+
+            ["{{INTER_CMUN}}"] = ResolveMunicipioOrExternal(
+                infDps.interm.end,
                 warnings,
-                "infNFSe.DPS.InfDPS.interm.end.endNac.cMun"),
+                "infNFSe.DPS.InfDPS.interm.end"),
 
             ["{{INTER_EMAIL}}"] = DanfeFallback.OrDash(
                 infDps.interm.email,
@@ -460,6 +485,34 @@ public sealed class DanfeHtmlRenderer
                 warnings,
                 "Fone Intermediário",
                 "infNFSe.DPS.InfDPS.interm.fone")
+        };
+    }
+
+    private Dictionary<string, string> BuildDestinatarioMap(InfDPS infDps, DanfeWarningCollector warnings)
+    {
+        var destinatario = infDps.IBSCBS?.dest;
+        if (destinatario == null)
+            return new Dictionary<string, string>();
+
+        int? codigoMunicipio = destinatario.end?.endNac?.cMun;
+        var municipio = codigoMunicipio is > 0 ? MunicipiosIbge.GetMunicipio(codigoMunicipio.Value) : null;
+        var municipioUf = municipio?.NomeComUf;
+        if (string.IsNullOrWhiteSpace(municipioUf) && destinatario.end?.endExt != null)
+            municipioUf = JoinSlash(destinatario.end.endExt.xCidade, destinatario.end.endExt.xEstProvReg);
+
+        return new Dictionary<string, string>
+        {
+            ["{{DEST_CNPJ}}"] = DanfeFallback.OrDash(
+                Helper.FormatTaxIdentifier(destinatario.CNPJ, destinatario.CPF, destinatario.NIF),
+                warnings,
+                "CNPJ/CPF/NIF Destinatario",
+                "infNFSe.DPS.InfDPS.IBSCBS.dest"),
+            ["{{DEST_RAZAO}}"] = DanfeFallback.OrDash(destinatario.xNome),
+            ["{{DEST_ENDERECO}}"] = DanfeFallback.OrDash(Helper.BuildEndereco(destinatario.end)),
+            ["{{DEST_CMUN}}"] = DanfeFallback.OrDash(municipioUf),
+            ["{{DEST_CODIGO_CEP}}"] = FormatLocationCodeAndPostalCode(destinatario.end),
+            ["{{DEST_EMAIL}}"] = DanfeFallback.OrDash(destinatario.email),
+            ["{{DEST_FONE}}"] = DanfeFallback.OrDash(Helper.FormatTelefone(destinatario.fone))
         };
     }
 
@@ -509,6 +562,142 @@ public sealed class DanfeHtmlRenderer
 
         return DanfeFallback.OrDash(mun.NomeComUf, warnings, "NomeComUf", path);
     }
+
+    private static string ResolveMunicipioOrExternal(EndSimples? endereco, DanfeWarningCollector warnings, string path)
+    {
+        if (endereco?.endNac?.cMun is > 0)
+            return ResolveMunicipioNomeComUf(endereco.endNac.cMun, warnings, $"{path}.endNac.cMun");
+
+        if (endereco?.endExt != null)
+            return JoinSlash(endereco.endExt.xCidade, endereco.endExt.xEstProvReg);
+
+        warnings.FieldMissing("cMun/xCidade", path, "-");
+        return "-";
+    }
+
+    private static string FormatPostalCode(EndSimples? endereco) =>
+        endereco?.endNac != null
+            ? Helper.FormatCep(endereco.endNac.CEP)
+            : Helper.NullToDash(endereco?.endExt?.cEndPost);
+
+    private static string FormatLocationCodeAndPostalCode(EndSimples? endereco) =>
+        endereco?.endNac != null
+            ? FormatCodigoCep(endereco.endNac.cMun, endereco.endNac.CEP)
+            : Helper.NullToDash(endereco?.endExt?.cEndPost);
+
+    private static decimal? ResolveIssDeductions(InfDPS infDps, InfNFSe inf, valores? valoresIbsCbs)
+    {
+        if (infDps.valores?.vDedRed?.vDR.HasValue == true)
+            return infDps.valores.vDedRed.vDR;
+
+        if (valoresIbsCbs?.vDR.HasValue == true)
+            return valoresIbsCbs.vDR;
+
+        return SumNullable(inf.valores?.vCalcDR, valoresIbsCbs?.vCalcReeRepRes);
+    }
+
+    private static decimal? CalculateIbsCbsExclusions(params decimal?[] values)
+    {
+        if (!values.Any(value => value.HasValue))
+            return null;
+
+        return values.Sum(value => value ?? 0m);
+    }
+
+    private static decimal? SumNullable(decimal? first, decimal? second)
+    {
+        if (!first.HasValue && !second.HasValue)
+            return null;
+
+        return (first ?? 0m) + (second ?? 0m);
+    }
+
+    private static string FormatCurrency(decimal? value, CultureInfo culture) =>
+        value.HasValue ? value.Value.ToString("C", culture) : "-";
+
+    private static string FormatPercent(decimal? value, CultureInfo culture) =>
+        value.HasValue ? $"{value.Value.ToString("N2", culture)}%" : "-";
+
+    private static string FormatTributacaoCode(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "-";
+        return Regex.Replace(value, @"^(\d{2})(\d{2})(\d{2})$", "$1.$2.$3");
+    }
+
+    private static string JoinSlash(params string?[] values) =>
+        string.Join(" / ", values.Select(value => string.IsNullOrWhiteSpace(value) ? "-" : value));
+
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
+
+    private static string FormatMunicipioUf(string? municipio, string? uf) =>
+        JoinSlash(municipio, uf);
+
+    private static string FormatCodigoCep(string? codigo, string? cep) =>
+        JoinSlash(codigo, Helper.FormatCep(cep));
+
+    private static string FormatCodigoCep(int? codigo, string? cep) =>
+        FormatCodigoCep(codigo is > 0 ? codigo.Value.ToString(CultureInfo.InvariantCulture) : null, cep);
+
+    private static string? ResolveUf(string? codigoMunicipio)
+    {
+        if (!int.TryParse(codigoMunicipio, out var codigo)) return null;
+        return MunicipiosIbge.GetMunicipio(codigo)?.Uf;
+    }
+
+    private static string BuildWatermark(string text) => $@"<div style=""
+              position:absolute;
+              top:50%;
+              left:50%;
+              display:inline-block;
+              -webkit-transform: translate(-50%, -50%) rotate(-30deg);
+              transform: translate(-50%, -50%) rotate(-30deg);
+              -webkit-transform-origin: 50% 50%;
+              transform-origin: 50% 50%;
+              font-family: Arial, 'Liberation Sans', Helvetica, sans-serif;
+              font-size:50pt;
+              font-weight:normal;
+              color:#a6a6a6;
+              z-index:9999;
+              pointer-events:none;
+              white-space:nowrap;"">{Helper.HtmlEncode(text)}</div>";
+
+    private static string GetDescricaoAmbienteGerador(int ambiente) => ambiente switch
+    {
+        1 => "Prefeitura",
+        2 => "Sistema Nacional da NFS-e",
+        _ => "-"
+    };
+
+    private static string GetDescricaoTipoAmbiente(int ambiente) => ambiente switch
+    {
+        1 => "Produção",
+        2 => "Produção Restrita",
+        _ => "-"
+    };
+
+    private static string GetDescricaoEmitenteV2(int emitente) => emitente switch
+    {
+        1 => "Prestador",
+        2 => "Tomador",
+        3 => "Intermediário",
+        _ => "-"
+    };
+
+    private static string GetDescricaoSituacao(int situacao) => situacao switch
+    {
+        100 => "NFS-e Gerada",
+        102 => "NFS-e de Decisão Judicial",
+        103 => "NFS-e Avulsa",
+        107 => "NFS-e MEI",
+        _ => situacao > 0 ? situacao.ToString(CultureInfo.InvariantCulture) : "-"
+    };
+
+    private static string GetDescricaoFinalidade(int? finalidade) => finalidade switch
+    {
+        0 => "NFS-e regular",
+        _ => "-"
+    };
 
     private string GetDescricaoRetencao(int? tpRetISSQN)
     {
@@ -662,10 +851,21 @@ public sealed class DanfeHtmlRenderer
                 return "Profissional Autônomo";
             case 6:
                 return "Sociedade de Profissionais";
+            case 9:
+                return "Outros";
             default:
                 return "-";
         }
     }
+
+    private static string GetDescricaoBeneficioMunicipal(string? tipo) => tipo switch
+    {
+        "1" => "Isenção",
+        "2" => "Redução da base de cálculo em percentual",
+        "3" => "Redução da base de cálculo em valor",
+        "4" => "Alíquota diferenciada",
+        _ => "-"
+    };
 
     private string GetDescricaoTipoImunidade(int? tpImunidade)
     {

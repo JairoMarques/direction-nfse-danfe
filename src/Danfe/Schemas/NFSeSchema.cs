@@ -259,7 +259,15 @@ namespace Direction.NFSe.Danfe
     {
         public string? idDocTec { get; set; }
         public string? docRef { get; set; }
+        public string? xPed { get; set; }
+        public InfoItemPedido? gItemPed { get; set; }
         public string? xInfComp { get; set; }
+    }
+
+    public class InfoItemPedido
+    {
+        [XmlElement("xItemPed")]
+        public List<string> xItemPed { get; set; } = [];
     }
 
     public class CServ
@@ -332,12 +340,14 @@ namespace Direction.NFSe.Danfe
 
     public class VDedRed
     {
-        public decimal pDR { get; set; }
-        public decimal vDR { get; set; }
+        public decimal? pDR { get; set; }
+        public decimal? vDR { get; set; }
 
         [XmlArray("documentos")]
         public List<Documento>? documentos { get; set; }
 
+        public bool ShouldSerializepDR() => pDR.HasValue;
+        public bool ShouldSerializevDR() => vDR.HasValue;
         public bool ShouldSerializedocumentos() => documentos != null && documentos.Count > 0;
     }
 
@@ -440,6 +450,15 @@ namespace Direction.NFSe.Danfe
         public decimal vTotTribFed { get; set; }
         public decimal vTotTribEst { get; set; }
         public decimal vTotTribMun { get; set; }
+
+        [XmlIgnore]
+        public bool vTotTribFedSpecified { get; set; }
+
+        [XmlIgnore]
+        public bool vTotTribEstSpecified { get; set; }
+
+        [XmlIgnore]
+        public bool vTotTribMunSpecified { get; set; }
     }
 
     public class TotTrib
@@ -464,6 +483,11 @@ namespace Direction.NFSe.Danfe
         public dest? dest { get; set; }
         public imovel? imovel { get; set; }
         public valores? valores { get; set; }
+
+        // Campos calculados presentes no grupo IBSCBS da NFS-e autorizada.
+        public string? cLocalidadeIncid { get; set; }
+        public string? xLocalidadeIncid { get; set; }
+        public TotCIBS? totCIBS { get; set; }
     }
 
     public class gRefNFSe
@@ -515,6 +539,14 @@ namespace Direction.NFSe.Danfe
     {
         public gReeRepRes? gReeRepRes { get; set; }
         public trib? trib { get; set; }
+
+        // Resultado da apuracao do IBS/CBS na NFS-e autorizada.
+        public decimal? vBC { get; set; }
+        public decimal? vCalcReeRepRes { get; set; }
+        public decimal? vDR { get; set; }
+        public ValoresIbsUf? uf { get; set; }
+        public ValoresIbsMun? mun { get; set; }
+        public ValoresCbs? fed { get; set; }
     }
 
     public class gReeRepRes
@@ -592,5 +624,55 @@ namespace Direction.NFSe.Danfe
         public int pDifUF { get; set; }
         public int pDifMun { get; set; }
         public int pDifCBS { get; set; }
+    }
+
+    public class ValoresIbsUf
+    {
+        public decimal? pRedAliqUF { get; set; }
+        public decimal? pIBSUF { get; set; }
+        public decimal? pAliqEfetUF { get; set; }
+    }
+
+    public class ValoresIbsMun
+    {
+        public decimal? pRedAliqMun { get; set; }
+        public decimal? pIBSMun { get; set; }
+        public decimal? pAliqEfetMun { get; set; }
+    }
+
+    public class ValoresCbs
+    {
+        public decimal? pRedAliqCBS { get; set; }
+        public decimal? pCBS { get; set; }
+        public decimal? pAliqEfetCBS { get; set; }
+    }
+
+    public class TotCIBS
+    {
+        public decimal? vTotNF { get; set; }
+        public TotaisIbs? gIBS { get; set; }
+        public TotaisCbs? gCBS { get; set; }
+    }
+
+    public class TotaisIbs
+    {
+        public decimal? vIBSTot { get; set; }
+        public TotalIbsUf? gIBSUFTot { get; set; }
+        public TotalIbsMun? gIBSMunTot { get; set; }
+    }
+
+    public class TotalIbsUf
+    {
+        public decimal? vIBSUF { get; set; }
+    }
+
+    public class TotalIbsMun
+    {
+        public decimal? vIBSMun { get; set; }
+    }
+
+    public class TotaisCbs
+    {
+        public decimal? vCBS { get; set; }
     }
 }

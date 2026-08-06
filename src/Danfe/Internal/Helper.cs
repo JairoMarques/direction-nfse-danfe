@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -50,8 +51,8 @@ namespace Direction.NFSe.Danfe
         public static string BuildDescricaoServicoHtml(string? desc)
         {
             if (string.IsNullOrWhiteSpace(desc)) return "-";
-            // encode e depois quebra linha em <br/>
-            var encoded = HtmlEncode(desc!);
+            // A NT 008 limita o campo a 1.300 caracteres, com reticências.
+            var encoded = HtmlEncode(desc.Limit(1300));
             return encoded.Replace("\r\n", "<br/>").Replace("\n", "<br/>");
         }
 
@@ -82,6 +83,9 @@ namespace Direction.NFSe.Danfe
 
                 if (!string.IsNullOrEmpty(serv.infoCompl.xInfComp))
                     AppendWithSeparator(sb, $"<b>Inf Cont:</b> {serv.infoCompl.xInfComp}");
+
+                if (!string.IsNullOrWhiteSpace(serv.infoCompl.docRef))
+                    AppendWithSeparator(sb, $"<b>Doc Ref:</b> {serv.infoCompl.docRef}");
             }
 
             if (serv.cServ.cNBS != 0)
@@ -90,6 +94,63 @@ namespace Direction.NFSe.Danfe
             }
 
             return sb.Length == 0 ? "-" : sb.ToString();
+        }
+
+        public static string BuildInfComplementares(InfNFSe inf, CultureInfo culture)
+        {
+            var items = new List<string>();
+            var infDps = inf.DPS?.InfDPS;
+            var serv = infDps?.serv;
+
+            AppendComplementary(items, "Inf. Cont.:", serv?.infoCompl?.xInfComp);
+            AppendComplementary(items, "NFS-e Subst.:", infDps?.subst?.chSubstda);
+            AppendComplementary(items, "Doc. Ref.:", serv?.infoCompl?.docRef);
+            AppendComplementary(items, "Cod. Obra:", serv?.obra?.cObra);
+            AppendComplementary(items, "Insc. Imob.:", infDps?.IBSCBS?.imovel?.inscImobFisc ?? serv?.obra?.inscImobFisc);
+            AppendComplementary(items, "Cod. Evt.:", serv?.atvEvento?.idAtvEvt);
+            AppendComplementary(items, "Doc. Tec.:", serv?.infoCompl?.idDocTec);
+            AppendComplementary(items, "Núm. Ped.:", serv?.infoCompl?.xPed);
+
+            var itensPedido = serv?.infoCompl?.gItemPed?.xItemPed;
+            if (itensPedido is { Count: > 0 })
+                AppendComplementary(items, "Item Ped.:", string.Join(", ", itensPedido));
+
+            AppendComplementary(items, "Inf. A. T. Mun.:", inf.valores?.xOutInf);
+
+            // Reserva a linha obrigatória dos totais; somente o conteúdo anterior é truncado.
+            var complementares = string.Join(" | ", items).Limit(1997);
+            var totais = BuildTotaisAproximados(infDps?.valores?.trib?.totTrib, culture);
+            return string.IsNullOrEmpty(complementares)
+                ? totais
+                : $"{HtmlEncode(complementares)}<br/>{totais}";
+        }
+
+        private static void AppendComplementary(List<string> items, string label, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                items.Add($"{label} {value!.Trim()}");
+        }
+
+        private static string BuildTotaisAproximados(TotTrib? totais, CultureInfo culture)
+        {
+            string federal = "-";
+            string estadual = "-";
+            string municipal = "-";
+
+            if (totais?.vTotTrib != null)
+            {
+                federal = totais.vTotTrib.vTotTribFed.ToString("C", culture);
+                estadual = totais.vTotTrib.vTotTribEst.ToString("C", culture);
+                municipal = totais.vTotTrib.vTotTribMun.ToString("C", culture);
+            }
+            else if (totais?.pTotTrib != null)
+            {
+                federal = $"{totais.pTotTrib.pTotTribFed.ToString("N2", culture)}%";
+                estadual = $"{totais.pTotTrib.pTotTribEst.ToString("N2", culture)}%";
+                municipal = $"{totais.pTotTrib.pTotTribMun.ToString("N2", culture)}%";
+            }
+
+            return $"Totais Aproximados dos Tributos cfe. Lei nº 12.741/2012: Federais: {federal}; Estaduais: {estadual}; Municipais: {municipal};";
         }
 
         public static DateTime? TryParseDate(string? value)
@@ -145,6 +206,21 @@ namespace Direction.NFSe.Danfe
             return fone!;
         }
 
+        public static string FormatTaxIdentifier(string? cnpj, string? cpf, string? nif)
+        {
+            if (!string.IsNullOrWhiteSpace(cnpj)) return FormatCnpj(cnpj);
+            if (!string.IsNullOrWhiteSpace(cpf)) return FormatCpf(cpf);
+            return NullToDash(nif);
+        }
+
+        public static string FormatNbs(int nbs)
+        {
+            if (nbs == 0) return "-";
+
+            var value = nbs.ToString("D9", CultureInfo.InvariantCulture);
+            return Regex.Replace(value, @"^(\d)(\d{4})(\d{2})(\d{2})$", "$1.$2.$3.$4");
+        }
+
         public static string OnlyDigits(string s)
         {
             var sb = new StringBuilder(s?.Length ?? 0);
@@ -173,7 +249,8 @@ namespace Direction.NFSe.Danfe
             var corte = texto!.Substring(0, maxChars - 3); // reserva espaço para "..."
             var ultimoEspaco = corte.LastIndexOf(' ');
 
-            if (ultimoEspaco > 0)
+            // Evita descartar quase todo o conteúdo quando há uma palavra longa sem espaços.
+            if (ultimoEspaco >= corte.Length - 40)
                 corte = corte.Substring(0, ultimoEspaco);
 
             return corte + "...";
@@ -194,7 +271,16 @@ namespace Direction.NFSe.Danfe
             return Regex.Replace(html, pattern, "", RegexOptions.Singleline);
         }
 
-        public static string ApplyConditionalSections(string html, bool hasTomador, bool hasIntermediario)
+        public static string ApplyConditionalSections(
+            string html,
+            bool hasTomador,
+            bool hasIntermediario,
+            bool hasDestinatario,
+            bool destinatarioIsTomador,
+            bool showPisCofins,
+            bool issSubject,
+            bool showIssOptionalRow1,
+            bool showIssOptionalRow2)
         {
             // TOMADOR
             if (hasTomador)
@@ -215,6 +301,37 @@ namespace Direction.NFSe.Danfe
             {
                 html = RemoveBlock(html, "<!-- INTERMEDIARIO:BEGIN_IDENTIFIED -->", "<!-- INTERMEDIARIO:END_IDENTIFIED -->");
             }
+
+            // DESTINATARIO
+            if (hasDestinatario)
+            {
+                html = RemoveBlock(html, "<!-- DESTINATARIO:BEGIN_SAME_AS_TOMADOR -->", "<!-- DESTINATARIO:END_SAME_AS_TOMADOR -->");
+                html = RemoveBlock(html, "<!-- DESTINATARIO:BEGIN_NOT_IDENTIFIED -->", "<!-- DESTINATARIO:END_NOT_IDENTIFIED -->");
+            }
+            else if (destinatarioIsTomador)
+            {
+                html = RemoveBlock(html, "<!-- DESTINATARIO:BEGIN_IDENTIFIED -->", "<!-- DESTINATARIO:END_IDENTIFIED -->");
+                html = RemoveBlock(html, "<!-- DESTINATARIO:BEGIN_NOT_IDENTIFIED -->", "<!-- DESTINATARIO:END_NOT_IDENTIFIED -->");
+            }
+            else
+            {
+                html = RemoveBlock(html, "<!-- DESTINATARIO:BEGIN_IDENTIFIED -->", "<!-- DESTINATARIO:END_IDENTIFIED -->");
+                html = RemoveBlock(html, "<!-- DESTINATARIO:BEGIN_SAME_AS_TOMADOR -->", "<!-- DESTINATARIO:END_SAME_AS_TOMADOR -->");
+            }
+
+            if (!showPisCofins)
+                html = RemoveBlock(html, "<!-- PISCOFINS:BEGIN -->", "<!-- PISCOFINS:END -->");
+
+            if (issSubject)
+                html = RemoveBlock(html, "<!-- ISS:BEGIN_NOT_SUBJECT -->", "<!-- ISS:END_NOT_SUBJECT -->");
+            else
+                html = RemoveBlock(html, "<!-- ISS:BEGIN_SUBJECT -->", "<!-- ISS:END_SUBJECT -->");
+
+            if (!showIssOptionalRow1)
+                html = RemoveBlock(html, "<!-- ISS_OPTIONAL_1:BEGIN -->", "<!-- ISS_OPTIONAL_1:END -->");
+
+            if (!showIssOptionalRow2)
+                html = RemoveBlock(html, "<!-- ISS_OPTIONAL_2:BEGIN -->", "<!-- ISS_OPTIONAL_2:END -->");
 
             return html;
         }

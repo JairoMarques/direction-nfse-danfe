@@ -1,796 +1,727 @@
 <!doctype html>
-
-<html>
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>DANFSe</title>
+    <title>DANFSe v2.0</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+      }
+      html,
+      body {
+        width: 210mm;
+        min-height: 297mm;
+        background: #fff;
+        color: #000;
+      }
+      body {
+        font-family: "Microsoft Sans Serif", "Liberation Sans", Tahoma, Arial, sans-serif;
+        font-size: 7pt;
+        line-height: 1.15;
+      }
+      .folha {
+        position: relative;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 1.8mm;
+      }
+      .danfse-frame {
+        position: relative;
+        width: 100%;
+        height: 293.4mm;
+        border: 1pt solid #000;
+        overflow: hidden;
+      }
+      table.danfse {
+        width: 100%;
+        border: 0;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      table.danfse td {
+        border: 0;
+        vertical-align: top;
+        padding: 1pt 2pt;
+        overflow: hidden;
+      }
+      .c {
+        height: 6mm;
+      }
+      .lbl {
+        display: block;
+        font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+        font-size: 6pt;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .val {
+        display: block;
+        font-size: 7pt;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .val.wrap {
+        white-space: normal;
+        word-break: break-word;
+      }
+      .ident-row .lbl {
+        font-size: 7pt;
+        text-transform: uppercase;
+      }
+      .sec-title td {
+        border-top: 0.5pt solid #000 !important;
+        height: 6.3mm;
+      }
+      .sec-title-label {
+        width: 25%;
+        background: #f2f2f2;
+        font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+        font-size: 7pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        vertical-align: middle !important;
+      }
+      .bg-cinza {
+        background: #f2f2f2;
+      }
+      .cab {
+        height: 12mm;
+        vertical-align: middle !important;
+        border-bottom: 0.5pt solid #000 !important;
+        background: #f2f2f2;
+      }
+      .cab-logo {
+        width: 25%;
+        text-align: center;
+      }
+      .cab-logo img {
+        max-width: 40mm;
+        max-height: 8.5mm;
+      }
+      .cab-titulo {
+        width: 50%;
+        text-align: center;
+        font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+        font-size: 9pt;
+        font-weight: bold;
+        line-height: 1.25;
+      }
+      .cab-titulo .sub {
+        font-size: 9pt;
+      }
+      .cab-titulo .val-jur {
+        color: #e30613;
+        font-size: 9pt;
+      }
+      .cab-info {
+        width: 25%;
+        font-size: 6pt;
+        line-height: 1.25;
+      }
+      .cab-info .municipio {
+        font-size: 8pt;
+      }
+      .c-qr {
+        width: 25%;
+        text-align: center;
+        vertical-align: top !important;
+        padding-top: 2mm !important;
+      }
+      /* Compensa a conversão de unidades do wkhtmltopdf e mantém o QR renderizado >= 15,2 mm. */
+      .c-qr img {
+        width: 15.4mm;
+        height: 15.4mm;
+      }
+      .c-qr .qr-txt {
+        margin: 1mm auto 0;
+        width: 42mm;
+        font-size: 6pt;
+        line-height: 1.1;
+        white-space: normal;
+      }
+      .supr {
+        height: 3.2mm;
+        vertical-align: middle !important;
+        padding: 0 3pt !important;
+        border-top: 0.5pt solid #000 !important;
+        text-align: center;
+        font-size: 6pt;
+        color: #000;
+      }
+      .iss-nao-sujeita {
+        height: 3.2mm;
+        vertical-align: middle !important;
+        border-top: 0.5pt solid #000 !important;
+        text-align: center;
+        font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+        font-size: 7pt;
+        font-weight: bold;
+      }
+      .desc-tributacao {
+        min-height: 4mm;
+        height: auto;
+      }
+      .desc-servico {
+        min-height: 9mm;
+        height: auto;
+      }
+      .info-compl {
+        min-height: 17mm;
+        height: auto;
+      }
+      .canhoto {
+        position: absolute;
+        right: 0;
+        bottom: 7.5mm;
+        left: 0;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      .canhoto td {
+        height: 6mm;
+        border: 0.5pt solid #000 !important;
+        padding: 1pt 3pt !important;
+      }
+      .canhoto .lbl {
+        font-size: 6pt;
+        text-transform: uppercase;
+      }
+      .canhoto .val {
+        font-size: 7pt;
+      }
+    </style>
   </head>
-  <body
-    style="
-      font-family: {{FONT_FAMILY}}
-      font-size: {{FONT_SIZE}}
-      margin: 0;
-      padding: 0;
-      margin: 5px;
-      border: 2px solid #000;
-    "
-  >
-    <div class="page" style="width: 100%; margin: 0 auto">
-      <!--div de CANCELADA -->
-      {{NFSE_CANCELADA_DIV}}
-      <!-- CABEÇALHO -->
-      <!--div de SUBSTITUIDA -->
-      {{NFSE_SUBSTITUIDA_DIV}}
-      <!-- CABEÇALHO -->
-      <div class="section" style="border-bottom: none; margin-top: 4px; margin-bottom: -10px">
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="width: 30%; vertical-align: top">
-                <img
-                  style="padding: 6px 0px 6px 5px; width: auto; height: 40px"
-                  alt="Logo"
-                  class="nfse-logo"
-                  src="data:image/png;base64,{{NFSE_LOGO}}"
-                />
-              </td>
-              <td style="width: 40%; vertical-align: top; text-align: center">
-                <div class="title-main" style="font-size: 15px; font-weight: bold">DANFSe v1.0</div>
-                <div class="title-main" style="font-size: 15px; font-weight: bold">Documento Auxiliar da NFS-e</div>
-                <div
-                  class="big-title-warning"
-                  style="font-size: 15px; font-weight: bold; color: red; margin-bottom: 2px"
-                >
-                  {{VALIDADE_JURIDICA}}
-                  <br />
-                </div>
-              </td>
-              <td style="width: 30%; vertical-align: top">
-                <table cellspacing="0" cellpadding="0">
-                  <tr>
-                    <td style="vertical-align: top">
-                      <img
-                        style="width: auto; height: 50px; margin-top: 2px; margin-right: 10px"
-                        class="prefeitura-logo"
-                        src="data:image/png;base64,{{PREFEITURA_LOGO}}"
-                      />
-                    </td>
-                    <td style="width: 6px">&nbsp;</td>
-
-                    <td style="vertical-align: top; font-size: 12px">{{LOGO_NAME}}</td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- CHAVE DE ACESSO -->
-      <div class="section">
-        <div
-          class="section-title"
-          style="
-            padding: 4px 6px;
-            font-size: {{FONT_SIZE}}
-            text-transform: uppercase;
-            text-transform: none;
-            margin-bottom: -5px;
-            margin-left: 3px;
-			      font-weight: bold;
-          "
-        >
-          Chave de Acesso da NFS-e
-        </div>
-        <table style="width: 100%; border-collapse: collapse">
+  <body>
+    <div class="folha">
+      {{NFSE_CANCELADA_DIV}} {{NFSE_SUBSTITUIDA_DIV}}
+      <div class="danfse-frame">
+        <table class="danfse">
+          <colgroup>
+            <col style="width: 25%" />
+            <col style="width: 25%" />
+            <col style="width: 25%" />
+            <col style="width: 25%" />
+          </colgroup>
           <tr>
-            <td style="vertical-align: top; width: 75%">
-              <div style="margin-left: 8px; margin-bottom: 5px">{{CHAVE_ACESSO}}</div>
-              <div class="section-content" style="padding: 1px 6px 0px 6px">
-                <table style="width: 100%; border-collapse: collapse; margin-top: 7px">
-                  <tr>
-                    <td style="vertical-align: top; width: 25%">
-                      <div>
-                        <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                          Número da NFS-e
-                        </span>
-                        <br />
-                        {{NUMERO_NFSE}}
-                      </div>
-                    </td>
-                    <td style="vertical-align: top; width: 25%">
-                      <div>
-                        <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                          Competência da NFS-e
-                        </span>
-                        <br />
-                        {{COMPETENCIA}}
-                      </div>
-                    </td>
-                    <td style="vertical-align: top; width: 25%">
-                      <div>
-                        <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                          Data e Hora da emissão da NFS-e
-                        </span>
-                        <br />
-                        {{DATA_HORA_EMISSAO}}
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 7px">
-                  <tr>
-                    <td style="vertical-align: top; width: 25%">
-                      <div>
-                        <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                          Número da DPS
-                        </span>
-                        <br />
-                        {{NUMERO_DPS}}
-                      </div>
-                    </td>
-                    <td style="vertical-align: top; width: 25%">
-                      <div>
-                        <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                          Série da DPS
-                        </span>
-                        <br />
-                        {{SERIE_DPS}}
-                      </div>
-                    </td>
-                    <td style="vertical-align: top; width: 25%">
-                      <div>
-                        <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                          Data e Hora da emissão da DPS
-                        </span>
-                        <br />
-                        {{DATA_HORA_EMISSAO_DPS}}
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </div>
+            <td class="cab cab-logo"><img src="data:image/png;base64,{{NFSE_LOGO}}" alt="NFS-e" /></td>
+            <td class="cab cab-titulo" colspan="2">
+              <div>DANFSe v2.0</div>
+              <div class="sub">Documento Auxiliar da NFS-e</div>
+              <div class="val-jur">{{VALIDADE_JURIDICA}}</div>
             </td>
-            <td style="vertical-align: top; width: 25%; text-align: center">
-              <div
-                class="qrcode-container"
-                style="
-                  margin-top: -15px;
-                  width: 80px;
-                  height: 80px;
-                  margin-left: auto;
-                  margin-right: auto;
-                  margin-top: -10px;
-                  font-weight: bold;
-                "
-              >
-                <img alt="Logo" class="qrcode" src="{{QRCODE_SRC}}" style="width: 100%; height: 100%" />
-              </div>
-              <div style="font-size: {{FONT_SIZE_QRCODE}}; text-align: left">
+            <td class="cab cab-info">
+              <span class="municipio">Município: {{MUNICIPIO_EMITENTE}}</span>
+              <br />
+              Ambiente Gerador: {{AMBIENTE_GERADOR}}
+              <br />
+              Tipo de Ambiente: {{TIPO_AMBIENTE}}
+            </td>
+          </tr>
+
+          <tr class="ident-row">
+            <td class="c" colspan="3">
+              <span class="lbl">CHAVE DE ACESSO DA NFS-e</span>
+              <span class="val">{{CHAVE_ACESSO}}</span>
+            </td>
+            <td class="c-qr" rowspan="4">
+              <img src="{{QRCODE_SRC}}" alt="QR Code" />
+              <div class="qr-txt">
                 A autenticidade desta NFS-e pode ser verificada pela leitura deste código QR ou pela consulta da chave
                 de acesso no portal nacional da NFS-e
               </div>
             </td>
           </tr>
+          <tr class="ident-row">
+            <td class="c">
+              <span class="lbl">NÚMERO DA NFS-e</span>
+              <span class="val">{{NUMERO_NFSE}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">COMPETÊNCIA DA NFS-e</span>
+              <span class="val">{{COMPETENCIA}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">DATA E HORA DA EMISSÃO DA NFS-e</span>
+              <span class="val">{{DATA_HORA_EMISSAO}}</span>
+            </td>
+          </tr>
+          <tr class="ident-row">
+            <td class="c">
+              <span class="lbl">NÚMERO DA DPS</span>
+              <span class="val">{{NUMERO_DPS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">SÉRIE DA DPS</span>
+              <span class="val">{{SERIE_DPS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">DATA E HORA DA EMISSÃO DA DPS</span>
+              <span class="val">{{DATA_HORA_EMISSAO_DPS}}</span>
+            </td>
+          </tr>
+          <tr class="ident-row">
+            <td class="c bg-cinza">
+              <span class="lbl">EMITENTE DA NFS-e</span>
+              <span class="val"><strong>{{EMITENTE_NFSE}}</strong></span>
+            </td>
+            <td class="c">
+              <span class="lbl">SITUAÇÃO DA NFS-e</span>
+              <span class="val">{{SITUACAO_NFSE}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">FINALIDADE</span>
+              <span class="val">{{FINALIDADE}}</span>
+            </td>
+          </tr>
+
+          <tr class="sec-title">
+            <td class="sec-title-label">Prestador / Fornecedor</td>
+            <td class="c">
+              <span class="lbl">CNPJ / CPF / NIF</span>
+              <span class="val">{{PREST_CNPJ}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Indicador Municipal (Inscrição)</span>
+              <span class="val">{{PREST_IM}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Telefone</span>
+              <span class="val">{{PREST_FONE}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Nome / Nome Empresarial</span>
+              <span class="val">{{PREST_RAZAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Município / Sigla UF</span>
+              <span class="val">{{MUNICIPIO_EMITENTE}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Código IBGE / CEP</span>
+              <span class="val">{{PREST_CODIGO_CEP}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Endereço</span>
+              <span class="val">{{PREST_ENDERECO}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">E-mail</span>
+              <span class="val">{{PREST_EMAIL}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Simples Nacional na Data de Competência</span>
+              <span class="val">{{PREST_SIMPLES}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">Regime de Apuração Tributária pelo SN</span>
+              <span class="val">{{PREST_REGIME_SN}}</span>
+            </td>
+          </tr>
+
+          <!-- TOMADOR:BEGIN_IDENTIFIED -->
+          <tr class="sec-title">
+            <td class="sec-title-label">Tomador / Adquirente</td>
+            <td class="c">
+              <span class="lbl">CNPJ / CPF / NIF</span>
+              <span class="val">{{TOMA_CNPJ}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Indicador Municipal (Inscrição)</span>
+              <span class="val">{{TOMA_IM}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Telefone</span>
+              <span class="val">{{TOMA_FONE}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Nome / Nome Empresarial</span>
+              <span class="val">{{TOMA_RAZAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Município / Sigla UF</span>
+              <span class="val">{{TOMA_CMUN}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Código IBGE / CEP</span>
+              <span class="val">{{TOMA_CODIGO_CEP}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Endereço</span>
+              <span class="val">{{TOMA_ENDERECO}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">E-mail</span>
+              <span class="val">{{TOMA_EMAIL}}</span>
+            </td>
+          </tr>
+          <!-- TOMADOR:END_IDENTIFIED -->
+          <!-- TOMADOR:BEGIN_NOT_IDENTIFIED -->
+          <tr><td colspan="4" class="supr">TOMADOR/ADQUIRENTE DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e</td></tr>
+          <!-- TOMADOR:END_NOT_IDENTIFIED -->
+
+          <!-- DESTINATARIO:BEGIN_IDENTIFIED -->
+          <tr class="sec-title">
+            <td class="sec-title-label">Destinatário da Operação</td>
+            <td class="c">
+              <span class="lbl">CNPJ / CPF / NIF</span>
+              <span class="val">{{DEST_CNPJ}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Telefone</span>
+              <span class="val">{{DEST_FONE}}</span>
+            </td>
+            <td class="c"></td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Nome / Nome Empresarial</span>
+              <span class="val">{{DEST_RAZAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Município / Sigla UF</span>
+              <span class="val">{{DEST_CMUN}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Código IBGE / CEP</span>
+              <span class="val">{{DEST_CODIGO_CEP}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Endereço</span>
+              <span class="val">{{DEST_ENDERECO}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">E-mail</span>
+              <span class="val">{{DEST_EMAIL}}</span>
+            </td>
+          </tr>
+          <!-- DESTINATARIO:END_IDENTIFIED -->
+          <!-- DESTINATARIO:BEGIN_SAME_AS_TOMADOR -->
+          <tr><td colspan="4" class="supr">O DESTINATÁRIO É O PRÓPRIO TOMADOR/ADQUIRENTE DA OPERAÇÃO</td></tr>
+          <!-- DESTINATARIO:END_SAME_AS_TOMADOR -->
+          <!-- DESTINATARIO:BEGIN_NOT_IDENTIFIED -->
+          <tr><td colspan="4" class="supr">DESTINATÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e</td></tr>
+          <!-- DESTINATARIO:END_NOT_IDENTIFIED -->
+
+          <!-- INTERMEDIARIO:BEGIN_IDENTIFIED -->
+          <tr class="sec-title">
+            <td class="sec-title-label">Intermediário da Operação</td>
+            <td class="c">
+              <span class="lbl">CNPJ / CPF / NIF</span>
+              <span class="val">{{INTER_CNPJ}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Indicador Municipal (Inscrição)</span>
+              <span class="val">{{INTER_IM}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Telefone</span>
+              <span class="val">{{INTER_FONE}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Nome / Nome Empresarial</span>
+              <span class="val">{{INTER_RAZAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Município / Sigla UF</span>
+              <span class="val">{{INTER_CMUN}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Código IBGE / CEP</span>
+              <span class="val">{{INTER_CODIGO_CEP}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c" colspan="2">
+              <span class="lbl">Endereço</span>
+              <span class="val">{{INTER_ENDERECO}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">E-mail</span>
+              <span class="val">{{INTER_EMAIL}}</span>
+            </td>
+          </tr>
+          <!-- INTERMEDIARIO:END_IDENTIFIED -->
+          <!-- INTERMEDIARIO:BEGIN_NOT_IDENTIFIED -->
+          <tr><td colspan="4" class="supr">INTERMEDIÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e</td></tr>
+          <!-- INTERMEDIARIO:END_NOT_IDENTIFIED -->
+
+          <tr class="sec-title">
+            <td class="sec-title-label">Serviço Prestado</td>
+            <td class="c">
+              <span class="lbl">Código de Tributação Nacional/Municipal</span>
+              <span class="val">{{SERV_CODIGOS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Código da NBS</span>
+              <span class="val">{{SERV_NBS_FORMATADO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Local da Prestação / Sigla UF / País</span>
+              <span class="val">{{SERV_LOCAL_COMPLETO}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c desc-tributacao" colspan="4"><span class="val wrap">{{SERV_DESCRICAO_TRIBUTACAO}}</span></td>
+          </tr>
+          <tr>
+            <td class="c desc-servico" colspan="4">
+              <span class="lbl">Descrição do Serviço</span>
+              <span class="val wrap">{{SERV_DESC_HTML}}</span>
+            </td>
+          </tr>
+
+          <!-- ISS:BEGIN_SUBJECT -->
+          <tr class="sec-title">
+            <td class="sec-title-label">Tributação Municipal (ISSQN)</td>
+            <td class="c">
+              <span class="lbl">Tipo de Tributação do ISSQN</span>
+              <span class="val">{{ISS_TRIBUTACAO}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">Município / Sigla UF / País de Incidência do ISSQN</span>
+              <span class="val">{{ISS_MUN_INC_COMPLETO}}</span>
+            </td>
+          </tr>
+          <!-- ISS_OPTIONAL_1:BEGIN -->
+          <tr>
+            <td class="c">
+              <span class="lbl">Regime Especial de Tributação ISSQN</span>
+              <span class="val">{{ISS_REGIME}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Tipo de Imunidade ISSQN</span>
+              <span class="val">{{ISS_OPERACAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Suspensão da Exigibilidade ISSQN</span>
+              <span class="val">{{ISS_SUSPENSAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Número Processo Suspensão</span>
+              <span class="val">{{ISS_PROCESSO}}</span>
+            </td>
+          </tr>
+          <!-- ISS_OPTIONAL_1:END -->
+          <!-- ISS_OPTIONAL_2:BEGIN -->
+          <tr>
+            <td class="c">
+              <span class="lbl">Benefício Municipal</span>
+              <span class="val">{{ISS_BENEFICIO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Cálculo do BM</span>
+              <span class="val">{{ISS_CALCULO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Total Deduções/Reduções</span>
+              <span class="val">{{ISS_DEDUCOES}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Desconto Incondicionado</span>
+              <span class="val">{{ISS_DESC_INCOND}}</span>
+            </td>
+          </tr>
+          <!-- ISS_OPTIONAL_2:END -->
+          <tr>
+            <td class="c">
+              <span class="lbl">BC ISSQN</span>
+              <span class="val">{{ISS_BC}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Alíquota Aplicada</span>
+              <span class="val">{{ISS_ALIQ}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Retenção do ISSQN</span>
+              <span class="val">{{ISS_RETENCAO}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">ISSQN Apurado</span>
+              <span class="val">{{ISS_APURADO}}</span>
+            </td>
+          </tr>
+          <!-- ISS:END_SUBJECT -->
+          <!-- ISS:BEGIN_NOT_SUBJECT -->
+          <tr>
+            <td class="iss-nao-sujeita" colspan="4">TRIBUTAÇÃO MUNICIPAL (ISSQN) - OPERAÇÃO NÃO SUJEITA AO ISSQN</td>
+          </tr>
+          <!-- ISS:END_NOT_SUBJECT -->
+
+          <tr class="sec-title">
+            <td class="sec-title-label">Tributação Federal (Exceto CBS)</td>
+            <td class="c">
+              <span class="lbl">IRRF</span>
+              <span class="val">{{FED_IRRF}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Contribuição Previdenciária - Retida</span>
+              <span class="val">{{FED_CP}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Contribuições Sociais - Retidas</span>
+              <span class="val">{{FED_CSLL}}</span>
+            </td>
+          </tr>
+          <!-- PISCOFINS:BEGIN -->
+          <tr>
+            <td class="c">
+              <span class="lbl">PIS - Débito Apuração Própria</span>
+              <span class="val">{{FED_PIS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">COFINS - Débito Apuração Própria</span>
+              <span class="val">{{FED_COFINS}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">Descrição Contrib. Sociais - Retidas</span>
+              <span class="val">{{FED_RET_PISCOFINSCSLL}}</span>
+            </td>
+          </tr>
+          <!-- PISCOFINS:END -->
+
+          <tr class="sec-title">
+            <td class="sec-title-label">Tributação IBS/CBS</td>
+            <td class="c">
+              <span class="lbl">CST / cClassTrib</span>
+              <span class="val">{{IBSCBS_CST_CLASS}}</span>
+            </td>
+            <td class="c" colspan="2">
+              <span class="lbl">Indicador de Operação / Código IBGE Incidência / Município Incidência / Sigla UF</span>
+              <span class="val">{{IBSCBS_INCIDENCIA}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c">
+              <span class="lbl">Exclusões e Reduções da Base de Cálculo</span>
+              <span class="val">{{IBSCBS_EXCLUSOES}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Base de Cálculo Após Exclusões e Reduções</span>
+              <span class="val">{{IBSCBS_BC}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Red. Alíquota IBS / Red. Alíquota CBS</span>
+              <span class="val">{{IBSCBS_REDUCOES}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Alíquota - IBS UF / IBS Mun</span>
+              <span class="val">{{IBSCBS_ALIQUOTAS_IBS}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c">
+              <span class="lbl">Alíq. Efetiva Municipal - IBS</span>
+              <span class="val">{{IBSCBS_ALIQ_EFET_MUN}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Valor Apurado Municipal - IBS</span>
+              <span class="val">{{IBSCBS_VALOR_MUN}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Alíq. Efetiva Estadual - IBS</span>
+              <span class="val">{{IBSCBS_ALIQ_EFET_UF}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Valor Apurado Estadual - IBS</span>
+              <span class="val">{{IBSCBS_VALOR_UF}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c">
+              <span class="lbl">Valor Total Apurado - IBS</span>
+              <span class="val">{{IBSCBS_TOTAL_IBS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Alíquota - CBS</span>
+              <span class="val">{{IBSCBS_ALIQ_CBS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Alíquota Efetiva - CBS</span>
+              <span class="val">{{IBSCBS_ALIQ_EFET_CBS}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Valor Total Apurado - CBS</span>
+              <span class="val">{{IBSCBS_TOTAL_CBS}}</span>
+            </td>
+          </tr>
+
+          <tr class="sec-title">
+            <td class="sec-title-label">Valor Total da NFS-e</td>
+            <td class="c">
+              <span class="lbl">Valor da Operação / Serviço</span>
+              <span class="val"><strong>{{VALOR_SERVICO}}</strong></span>
+            </td>
+            <td class="c">
+              <span class="lbl">Desconto Incondicionado</span>
+              <span class="val">{{DESC_INCOND}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Desconto Condicionado</span>
+              <span class="val">{{DESC_COND}}</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="c">
+              <span class="lbl">Total das Retenções (ISSQN / Federais)</span>
+              <span class="val">{{TOTAL_RETENCOES}}</span>
+            </td>
+            <td class="c">
+              <span class="lbl">Valor Líquido da NFS-e</span>
+              <span class="val"><strong>{{VALOR_LIQUIDO}}</strong></span>
+            </td>
+            <td class="c">
+              <span class="lbl">Total do IBS/CBS</span>
+              <span class="val">{{IBSCBS_TOTAL}}</span>
+            </td>
+            <td class="c bg-cinza">
+              <span class="lbl">Valor Líquido da NFS-e + IBS/CBS</span>
+              <span class="val"><strong>{{IBSCBS_VALOR_TOTAL}}</strong></span>
+            </td>
+          </tr>
+
+          <tr class="sec-title">
+            <td class="sec-title-label">Informações Complementares</td>
+            <td colspan="3"></td>
+          </tr>
+          <tr>
+            <td class="c info-compl" colspan="4"><span class="val wrap">{{INF_COMPLEMENTARES}}</span></td>
+          </tr>
         </table>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- PRESTADOR -->
-      <div class="section">
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE_HEADER}}; color: black; font-weight: bold">
-                  EMITENTE DA NFS-e
-                </span>
-                <br />
-                {{PREST_SERV}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  CNPJ / CPF / NIF
-                </span>
-                <br />
-                {{PREST_CNPJ}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Inscrição Municipal
-                </span>
-                <br />
-                {{PREST_IM}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Telefone</span>
-                <br />
-                {{PREST_FONE}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Nome / Nome Empresarial
-                </span>
-                <br />
-                {{PREST_RAZAO}}
-              </td>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">E-mail</span>
-                <br />
-                {{PREST_EMAIL}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Endereço</span>
-                <br />
-                {{PREST_ENDERECO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Município</span>
-                <br />
-                {{PREST_MUNICIPIO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">CEP</span>
-                <br />
-                {{PREST_CEP}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Simples Nacional na Data de Competência
-                </span>
-                <br />
-                {{PREST_SIMPLES}}
-              </td>
-              <td style="vertical-align: top; width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Regime de Apuração Tributária pelo SN
-                </span>
-                <br />
-                {{PREST_REGIME_SN}}
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <!-- ======================= -->
-      <!-- TOMADOR (CONDICIONAL)   -->
-      <!-- ======================= -->
-      <!-- TOMADOR:BEGIN_NOT_IDENTIFIED -->
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <div class="section" style="border-bottom: none; text-align: center; font-size: 14px; font-weight: bold">
-        <span>TOMADOR DO SERVIÇO NÃO IDENTIFICADO NA NFS-e</span>
-      </div>
-      <!-- TOMADOR:END_NOT_IDENTIFIED -->
-      <!-- TOMADOR:BEGIN_IDENTIFIED -->
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <div class="section">
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE_HEADER}}; color: black; font-weight: bold">
-                  TOMADOR DO SERVIÇO
-                </span>
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  CNPJ / CPF / NIF
-                </span>
-                <br />
-                {{TOMA_CNPJ}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Inscrição Municipal
-                </span>
-                <br />
-                {{TOMA_IM}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Telefone</span>
-                <br />
-                {{TOMA_FONE}}
-              </td>
-            </tr>
-          </table>
-
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Nome / Nome Empresarial</span>
-                <br />
-                {{TOMA_RAZAO}}
-              </td>
-              <td style="width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">E-mail</span>
-                <br />
-                {{TOMA_EMAIL}}
-              </td>
-            </tr>
-          </table>
-
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Endereço</span>
-                <br />
-                {{TOMA_ENDERECO}}
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Município</span>
-                <br />
-                {{TOMA_CMUN}}
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">CEP</span>
-                <br />
-                {{TOMA_CEP}}
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <!-- TOMADOR:END_IDENTIFIED -->
-      <!-- ============================ -->
-      <!-- INTERMEDIÁRIO (CONDICIONAL)  -->
-      <!-- ============================ -->
-      <!-- INTERMEDIARIO:BEGIN_NOT_IDENTIFIED -->
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <div class="section" style="border-bottom: none; text-align: center; font-size: 14px; font-weight: bold">
-        <span>INTERMEDIÁRIO DO SERVIÇO NÃO IDENTIFICADO NA NFS-e</span>
-      </div>
-      <!-- INTERMEDIARIO:END_NOT_IDENTIFIED -->
-      <!-- INTERMEDIARIO:BEGIN_IDENTIFIED -->
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <div class="section">
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE_HEADER}}; font-weight: bold">
-                  INTERMEDIÁRIO DO SERVIÇO
-                </span>
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">CNPJ / CPF / NIF</span>
-                <br />
-                {{INTER_CNPJ}}
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Inscrição Municipal</span>
-                <br />
-                {{INTER_IM}}
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Telefone</span>
-                <br />
-                {{INTER_FONE}}
-              </td>
-            </tr>
-          </table>
-
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Nome / Nome Empresarial</span>
-                <br />
-                {{INTER_RAZAO}}
-              </td>
-              <td style="width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">E-mail</span>
-                <br />
-                {{INTER_EMAIL}}
-              </td>
-            </tr>
-          </table>
-
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="width: 50%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Endereço</span>
-                <br />
-                {{INTER_ENDERECO}}
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">Município</span>
-                <br />
-                {{INTER_CMUN}}
-              </td>
-              <td style="width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; font-weight: bold">CEP</span>
-                <br />
-                {{INTER_CEP}}
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <!-- INTERMEDIARIO:END_IDENTIFIED -->
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- SERVIÇO -->
-      <div class="section" style="border-bottom: none; height: 310px; max-height: 310px">
-        <div
-          class="section-title"
-          style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}}; text-transform: uppercase; font-weight: bold"
-        >
-          Serviço Prestado
-        </div>
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Código de Tributação Nacional
-                </span>
-                <br />
-                {{SERV_CTRIBNAC}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Código de Tributação Municipal
-                </span>
-                <br />
-                {{SERV_CTRIBMUN}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Local da Prestação
-                </span>
-                <br />
-                {{SERV_LOCAL}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  País da Prestação
-                </span>
-                <br />
-                {{SERV_PAIS}}
-              </td>
-            </tr>
-          </table>
-          <div class="mt-1" style="margin-top: 5px; width: 100%">
-            <div style="width: 90%">
-              <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                Descrição do Serviço
-              </span>
-              <br />
-              {{SERV_DESC_HTML}}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- TRIBUTAÇÃO MUNICIPAL -->
-      <div class="section">
-        <div
-          class="section-title"
-          style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}}; text-transform: uppercase; font-weight: bold"
-        >
-          TRIBUTAÇÃO MUNICIPAL
-        </div>
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Tributação do ISSQN
-                </span>
-                <br />
-                {{ISS_TRIBUTACAO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  País Resultado da Prestação do Serviço
-                </span>
-                <br />
-                {{ISS_PAIS}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Município de Incidência do ISSQN
-                </span>
-                <br />
-                {{ISS_MUN_INC}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Regime Especial de Tributação
-                </span>
-                <br />
-                {{ISS_REGIME}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Tipo de Imunidade
-                </span>
-                <br />
-                {{ISS_OPERACAO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Suspensão da Exigibilidade do ISSQN
-                </span>
-                <br />
-                {{ISS_SUSPENSAO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Número Processo Suspensão
-                </span>
-                <br />
-                {{ISS_PROCESSO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Benefício Municipal
-                </span>
-                <br />
-                {{ISS_BENEFICIO}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Valor do Serviço
-                </span>
-                <br />
-                {{VALOR_SERVICO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Desconto Incondicionado
-                </span>
-                <br />
-                {{ISS_DESC_INCOND}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Total Deduções/Reduções
-                </span>
-                <br />
-                {{ISS_DEDUCOES}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Cálculo do BM
-                </span>
-                <br />
-                {{ISS_CALCULO}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">BC ISSQN</span>
-                <br />
-                {{ISS_BC}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Alíquota Aplicada
-                </span>
-                <br />
-                {{ISS_ALIQ}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Retenção do ISSQN
-                </span>
-                <br />
-                {{ISS_RETENCAO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  ISSQN Apurado
-                </span>
-                <br />
-                {{ISS_APURADO}}
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- TRIBUTAÇÃO FEDERAL -->
-      <div class="section">
-        <div
-          class="section-title"
-          style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}}; text-transform: uppercase; font-weight: bold"
-        >
-          TRIBUTAÇÃO FEDERAL
-        </div>
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">IRRF</span>
-                <br />
-                {{FED_IRRF}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Contribuição Previdenciária - Retida
-                </span>
-                <br />
-                {{FED_CP}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Contribuições Sociais - Retidas
-                </span>
-                <br />
-                {{FED_CSLL}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Descrição Contrib. Sociais - Retidas
-                </span>
-                <br />
-                {{FED_RET_PISCOFINSCSLL}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  PIS - Debito Apuração Própria
-                </span>
-                <br />
-                {{FED_PIS}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  COFINS - Debito Apuração Própria
-                </span>
-                <br />
-                {{FED_COFINS}}
-              </td>
-              <td style="vertical-align: top; width: 25%"></td>
-              <td style="vertical-align: top; width: 25%">
-                <!--<span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Total Tributação Federal
-                </span>
-                <br />
-                {{FED_TOTAL}}-->
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- VALOR TOTAL DA NFS-E -->
-      <div class="section">
-        <div
-          class="section-title"
-          style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}}; text-transform: uppercase; font-weight: bold"
-        >
-          VALOR TOTAL DA NFS-E
-        </div>
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Valor do Serviço
-                </span>
-                <br />
-                {{VALOR_SERVICO}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Desconto Condicionado
-                </span>
-                <br />
-                {{DESC_COND}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Desconto Incondicionado
-                </span>
-                <br />
-                {{DESC_INCOND}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  ISSQN Retido
-                </span>
-                <br />
-                {{ISS_RETIDO}}
-              </td>
-            </tr>
-          </table>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 5px">
-            <tr>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Total das Retenções Federais
-                </span>
-                <br />
-                {{FED_RETIDOS}}
-              </td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  PIS/COFINS - Débito Apur. Própria
-                </span>
-                <br />
-                {{PISCOFINS_DEB}}
-              </td>
-              <td style="vertical-align: top; width: 25%"></td>
-              <td style="vertical-align: top; width: 25%">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  Valor Líquido da NFS-e
-                </span>
-                <br />
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">
-                  {{VALOR_LIQUIDO}}
-                </span>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- TOTAIS APROXIMADOS DOS TRIBUTOS -->
-      <div class="section">
-        <div
-          class="section-title"
-          style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}}; text-transform: uppercase; font-weight: bold"
-        >
-          TOTAIS APROXIMADOS DOS TRIBUTOS
-        </div>
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <table style="width: 100%; border-collapse: collapse">
-            <tr style="text-align: center">
-              <td style="vertical-align: top">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Federais</span>
-                <br />
-                {{TOT_FED}}
-              </td>
-              <td style="vertical-align: top">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Estaduais</span>
-                <br />
-                {{TOT_EST}}
-              </td>
-              <td style="vertical-align: top">
-                <span class="label" style="font-size: {{FONT_SIZE}}; color: black; font-weight: bold">Municipais</span>
-                <br />
-                {{TOT_MUN}}
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-      <div style="border-top: 1px solid #000; margin: 0 5px"></div>
-      <!-- INFORMAÇÕES COMPLEMENTARES -->
-      <div class="section" style="border-bottom: none; height: 110px; max-height: 110px">
-        <div
-          class="section-title"
-          style="padding: 4px 6px; font-size: {{FONT_SIZE_HEADER}}; text-transform: uppercase; font-weight: bold"
-        >
-          INFORMAÇÕES COMPLEMENTARES
-        </div>
-        <div class="section-content" style="padding: 1px 6px 6px 6px">
-          <div>{{INF_COMPLEMENTARES}}</div>
-        </div>
+        <table class="canhoto">
+          <tr>
+            <td style="width: 25%"><span class="lbl">Data Cientificação:</span></td>
+            <td style="width: 25%"><span class="lbl">Identificação e Assinatura</span></td>
+            <td style="width: 50%">
+              <span class="lbl">Nº NFS-e / Chave NFS-e</span>
+              <span class="val wrap">{{NUMERO_NFSE}} / {{CHAVE_ACESSO}}</span>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   </body>

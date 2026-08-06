@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup>
     <!-- Multi-target so the same package can be used by legacy .NET Framework 4.8 and .NET (Core) apps -->
-    <TargetFrameworks>net48;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net48;netstandard2.0;net10.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>false</ImplicitUsings>
@@ -30,8 +30,16 @@
 
   <!-- NuGet packages (replaces packages.config + HintPath references) -->
   <ItemGroup>
-    <PackageReference Include="NReco.PdfGenerator" Version="1.2.1" />
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\libs\libwkhtmltox.so"
+          Link="libwkhtmltox.so"
+          CopyToOutputDirectory="PreserveNewest"
+          Pack="true"
+          PackagePath="runtimes/linux-x64/native" />
   </ItemGroup>
 
   <!-- net48-only framework references that do NOT exist on .NET Standard -->
@@ -58,21 +66,15 @@
 
 <ItemGroup>
     <!-- Para projetos SDK/PackageReference -->
-    <None Include="buildTransitive\Direction.NFSe.Danfe.targets"
-            Pack="true"
-            PackagePath="buildTransitive\Direction.NFSe.Danfe.targets" />
+    <None Include="buildTransitive\Direction.NFSe.Danfe.targets" Pack="true" PackagePath="buildTransitive\Direction.NFSe.Danfe.targets" />
 
     <!-- Para projetos .NET Framework clássicos (non-SDK) -->
-    <None Include="buildTransitive\Direction.NFSe.Danfe.targets"
-            Pack="true"
-            PackagePath="build\Direction.NFSe.Danfe.targets" />
+    <None Include="buildTransitive\Direction.NFSe.Danfe.targets" Pack="true" PackagePath="build\Direction.NFSe.Danfe.targets" />
 </ItemGroup>
 
 
     <ItemGroup>
-  <None Include="Assets\**\*"
-        Pack="true"
-        PackagePath="contentFiles\any\any\Direction.NFSe.Danfe\Assets\">
+  <None Include="Assets\**\*" Pack="true" PackagePath="contentFiles\any\any\Direction.NFSe.Danfe\Assets\">
     <PackageCopyToOutput>true</PackageCopyToOutput>
   </None>
 </ItemGroup>

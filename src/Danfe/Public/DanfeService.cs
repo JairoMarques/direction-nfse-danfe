@@ -4,16 +4,16 @@ using System.Xml.Serialization;
 
 namespace Direction.NFSe.Danfe;
 
-public sealed class DanfeService
+public sealed class DanfeService : IDanfeService
 {
     private readonly DanfeHtmlRenderer _renderer;
     private readonly DanfePdfGenerator _pdf;
 
-    public DanfeService(DanfeOptions? options = null, NReco.PdfGenerator.HtmlToPdfConverter? converter = null)
+    public DanfeService(DanfeOptions? options = null)
     {
         options ??= new DanfeOptions();
         _renderer = new DanfeHtmlRenderer(options);
-        _pdf = new DanfePdfGenerator(converter);
+        _pdf = new DanfePdfGenerator();
     }
 
     public DanfeResult Generate(NFSeSchema nfse, DanfeEnvironment environment, DanfeStatus status = DanfeStatus.Autorizada)
@@ -53,7 +53,7 @@ public sealed class DanfeService
         return Generate(nfse, environment, status);
     }
     [Obsolete("Use Generate(string, DanfeEnvironment, DanfeStatus).")]
-    public DanfeResult Generate(string xml, DanfeEnvironment environment, bool isCancelled = false)
+    public DanfeResult Generate(string xml, DanfeEnvironment environment, bool isCancelled)
     {
         using var sr = new StringReader(xml);
         var nfse = Deserialize(sr);
@@ -67,7 +67,7 @@ public sealed class DanfeService
         return Generate(nfse, environment, status);
     }
     [Obsolete("Use Generate(Stream, DanfeEnvironment, DanfeStatus).")]
-    public DanfeResult Generate(Stream xmlStream, DanfeEnvironment environment, bool isCancelled = false)
+    public DanfeResult Generate(Stream xmlStream, DanfeEnvironment environment, bool isCancelled)
     {
         using var sr = new StreamReader(xmlStream);
         var nfse = Deserialize(sr);

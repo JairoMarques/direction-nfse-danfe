@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.01">
+  <infNFSe Id="NFS32052001220616143000130000000000949826079999999999">
+    <xLocEmi>LocalEmissao</xLocEmi>
+    <xLocPrestacao>Prestacao</xLocPrestacao>
+    <nNFSe>9999</nNFSe>
+    <cLocIncid>3288888</cLocIncid>
+    <xLocIncid>Municipio</xLocIncid>
+    <xTribNac>Processamento de dados, textos, imagens, vídeos e sistemas de informação.</xTribNac>
+    <verAplic>SilTecnologia_v1.00</verAplic>
+    <ambGer>1</ambGer>
+    <tpEmis>2</tpEmis>
+    <cStat>100</cStat>
+    <dhProc>2026-07-01T00:00:00-03:00</dhProc>
+    <nDFSe>64463999</nDFSe>
+    <emit>
+      <CNPJ>20616143999999</CNPJ>
+      <IM>279999</IM>
+      <xNome>PRESTADOR LTDA</xNome>
+      <enderNac><xLgr>RODOVIA DO SOL</xLgr><nro>2070</nro><xBairro>Bairro</xBairro><cMun>3208888</cMun><UF>ES</UF><CEP>29122222</CEP></enderNac>
+      <fone>27998489999</fone>
+      <email>TESTE@TESTE.COM.BR</email>
+    </emit>
+    <valores><vBC>1390.17</vBC><pAliqAplic>2.50</pAliqAplic><vISSQN>34.75</vISSQN><vLiq>1390.17</vLiq></valores>
+    <IBSCBS>
+      <cLocalidadeIncid>99888888</cLocalidadeIncid>
+      <xLocalidadeIncid>Localidade</xLocalidadeIncid>
+      <valores>
+        <vBC>1304.67</vBC>
+        <uf><pIBSUF>0.10</pIBSUF><pAliqEfetUF>0.00</pAliqEfetUF></uf>
+        <mun><pIBSMun>0.00</pIBSMun><pAliqEfetMun>0.00</pAliqEfetMun></mun>
+        <fed><pCBS>0.90</pCBS><pAliqEfetCBS>0.00</pAliqEfetCBS></fed>
+      </valores>
+      <totCIBS>
+        <vTotNF>1390.17</vTotNF>
+        <gIBS><vIBSTot>1.30</vIBSTot><gIBSUFTot><vIBSUF>1.30</vIBSUF></gIBSUFTot><gIBSMunTot><vIBSMun>0.00</vIBSMun></gIBSMunTot></gIBS>
+        <gCBS><vCBS>11.74</vCBS></gCBS>
+      </totCIBS>
+    </IBSCBS>
+    <DPS versao="1.01">
+      <infDPS Id="DPS320520022061614300013000002000000000000000">
+        <tpAmb>1</tpAmb><dhEmi>2026-07-01T00:00:00-03:00</dhEmi><verAplic>SilTecnologia_v1.00</verAplic><serie>2</serie><nDPS>68888</nDPS><dCompet>2026-07-01</dCompet><tpEmit>1</tpEmit><cLocEmi>3288888</cLocEmi>
+        <prest><CNPJ>20699993000000</CNPJ><IM>273999</IM><fone>27999999999</fone><email>ADMINISTRATIVO@TESTE.COM.BR</email><regTrib><opSimpNac>1</opSimpNac><regEspTrib>0</regEspTrib></regTrib></prest>
+        <toma><CNPJ>09999999900154</CNPJ><xNome>NOMETOMADOR</xNome><end><endNac><cMun>3209999</cMun><CEP>29088888</CEP></endNac><xLgr>Logradouro</xLgr><nro>134</nro><xBairro>Bairro</xBairro></end><email>teste@teste.com.br</email></toma>
+        <serv><locPrest><cLocPrestacao>55222555</cLocPrestacao></locPrest><cServ><cTribNac>010301</cTribNac><xDescServ>SUPORTE SQL SERVER</xDescServ><cNBS>115061000</cNBS></cServ><infoCompl><docRef>documento-123</docRef></infoCompl></serv>
+        <valores>
+          <vServPrest><vServ>1390.17</vServ></vServPrest>
+          <trib><tribMun><tribISSQN>1</tribISSQN><tpRetISSQN>1</tpRetISSQN></tribMun><tribFed><piscofins><CST>01</CST><vPis>9.04</vPis><vCofins>41.71</vCofins><tpRetPisCofins>0</tpRetPisCofins></piscofins></tribFed><totTrib><vTotTrib><vTotTribFed>0.00</vTotTribFed><vTotTribEst>0.00</vTotTribEst><vTotTribMun>34.75</vTotTribMun></vTotTrib></totTrib></trib>
+        </valores>
+        <IBSCBS><finNFSe>0</finNFSe><cIndOp>100301</cIndOp><indDest>0</indDest><valores><trib><gIBSCBS><CST>000</CST><cClassTrib>000001</cClassTrib></gIBSCBS></trib></valores></IBSCBS>
+      </infDPS>
+    </DPS>
+  </infNFSe>
+</NFSe>
